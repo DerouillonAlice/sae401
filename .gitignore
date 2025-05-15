@@ -1,0 +1,10 @@
+/backend/vendor
+/backend/.env
+/backend/.env.dev
+/backend/.env.prod
+/backend/.env.test
+/backend/.env.local
+/frontend/node_modules
+/frontend/dist
+/frontend/.vscode
+.env.local
