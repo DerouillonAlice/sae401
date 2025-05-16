@@ -57,12 +57,12 @@ class Favorite
         return $this;
     }
 
-    public function getLatitude(): ?string
+    public function getLatitude(): ?float
     {
         return $this->latitude;
     }
 
-    public function setLatitude(string $latitude): static
+    public function setLatitude(float $latitude): static
     {
         $this->latitude = $latitude;
 
