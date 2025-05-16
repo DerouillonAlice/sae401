@@ -1,10 +1,63 @@
-/backend/vendor
-/backend/.env
-/backend/.env.dev
-/backend/.env.prod
-/backend/.env.test
-/backend/.env.local
-/frontend/node_modules
-/frontend/dist
-/frontend/.vscode
-.env.local
+# ============================================
+# NODE / VUE.JS 
+# ============================================
+**/node_modules/
+**/dist/
+**/build/
+**/.vite/
+**/.nuxt/
+**/.output/
+**/.next/
+**/.parcel-cache/
+
+# Fichiers lock JS
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+**/bun.lockb
+
+# Logs & caches JS
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/.eslintcache
+**/.cache/
+
+# ============================================
+# SYMFONY / PHP 
+# ============================================
+**/vendor/
+**/var/
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.*
+!**/.env.example
+
+
+# ============================================
+# GÉNÉRAL / TOUS ENVIRONNEMENTS
+# ============================================
+# IDEs / éditeurs
+**/.idea/
+**/.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Fichiers temporaires
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.orig
+
+# Git
+.git/
