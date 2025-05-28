@@ -12,9 +12,29 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use App\Repository\UserRepository;
+use OpenApi\Attributes as OA;
 
 class AuthController extends AbstractController
 {
+    #[OA\Post(
+        path: '/register',
+        summary: 'Créer un nouvel utilisateur',
+        tags: ['Authentification'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', example: 'user@example.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'password123'),
+                    new OA\Property(property: 'firstname', type: 'string', example: 'Alice'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Utilisateur créé'),
+            new OA\Response(response: 400, description: 'Champs manquants')
+        ]
+    )]
     #[Route('/register', name: 'api_register', methods: ['POST'])]
     public function register(Request $request, UserPasswordHasherInterface $hasher, EntityManagerInterface $em): JsonResponse
     {
@@ -33,6 +53,30 @@ class AuthController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message' => 'User registered successfully'], 201);
+    }
+
+    #[OA\Post(
+        path: '/login_check',
+        summary: 'Authentification utilisateur (JWT)',
+        tags: ['Authentification'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'username', type: 'string', example: 'user@example.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'password123'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Token JWT retourné'),
+            new OA\Response(response: 401, description: 'Identifiants invalides')
+        ]
+    )]
+    #[Route('/login_check', name: 'api_login_check', methods: ['POST'])]
+    public function loginCheck()
+    {
+        // Ce endpoint est géré par LexikJWTAuthenticationBundle, pas besoin de code ici
     }
 
     #[Route('/request-reset-password', name: 'api_request_reset_password', methods: ['POST'])]
