@@ -10,11 +10,20 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use OpenApi\Attributes as OA;
 
 #[Route('/favorites')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 class FavoriteController extends AbstractController
 {
+    #[OA\Get(
+        path: '/favorites',
+        summary: 'Liste des favoris',
+        tags: ['Favoris'],
+        responses: [
+            new OA\Response(response: 200, description: 'Liste des favoris')
+        ]
+    )]
     #[Route('', name: 'favorite_list', methods: ['GET'])]
     public function list(FavoriteRepository $favoriteRepo): JsonResponse
     {
@@ -24,6 +33,31 @@ class FavoriteController extends AbstractController
         return $this->json($favorites, 200, [], ['groups' => 'favorite:read']);
     }
 
+    #[OA\Post(
+        path: '/favorites',
+        summary: 'Créer un favori',
+        tags: ['Favoris'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'city', type: 'string'),
+                    new OA\Property(property: 'latitude', type: 'number'),
+                    new OA\Property(property: 'longitude', type: 'number'),
+                    new OA\Property(property: 'position', type: 'integer'),
+                    new OA\Property(property: 'showHumidity', type: 'boolean'),
+                    new OA\Property(property: 'showPressure', type: 'boolean'),
+                    new OA\Property(property: 'showWind', type: 'boolean'),
+                    new OA\Property(property: 'showUV', type: 'boolean'),
+                    new OA\Property(property: 'showSunCycle', type: 'boolean'),
+                    new OA\Property(property: 'showVisibility', type: 'boolean'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Favori créé')
+        ]
+    )]
     #[Route('', name: 'favorite_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -48,6 +82,30 @@ class FavoriteController extends AbstractController
         return $this->json($favorite, 201, [], ['groups' => 'favorite:read']);
     }
 
+    #[OA\Put(
+        path: '/favorites/{id}',
+        summary: 'Mettre à jour un favori',
+        tags: ['Favoris'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'showHumidity', type: 'boolean'),
+                    new OA\Property(property: 'showPressure', type: 'boolean'),
+                    new OA\Property(property: 'showWind', type: 'boolean'),
+                    new OA\Property(property: 'showUV', type: 'boolean'),
+                    new OA\Property(property: 'showSunCycle', type: 'boolean'),
+                    new OA\Property(property: 'showVisibility', type: 'boolean'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Favori mis à jour')
+        ]
+    )]
     #[Route('/{id}', name: 'favorite_update', methods: ['PUT'])]
     public function update(Favorite $favorite, Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -69,6 +127,17 @@ class FavoriteController extends AbstractController
         return $this->json($favorite, 200, [], ['groups' => 'favorite:read']);
     }
 
+    #[OA\Delete(
+        path: '/favorites/{id}',
+        summary: 'Supprimer un favori',
+        tags: ['Favoris'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Favori supprimé')
+        ]
+    )]
     #[Route('/{id}', name: 'favorite_delete', methods: ['DELETE'])]
     public function delete(Favorite $favorite, EntityManagerInterface $em): JsonResponse
     {
