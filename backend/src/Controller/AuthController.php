@@ -79,6 +79,23 @@ class AuthController extends AbstractController
         // Ce endpoint est géré par LexikJWTAuthenticationBundle, pas besoin de code ici
     }
 
+    #[OA\Post(
+        path: '/request-reset-password',
+        summary: 'Demander la réinitialisation du mot de passe',
+        tags: ['Authentification'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', example: 'user@example.com')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Token de reset envoyé'),
+            new OA\Response(response: 404, description: 'Utilisateur non trouvé')
+        ]
+    )]
     #[Route('/request-reset-password', name: 'api_request_reset_password', methods: ['POST'])]
     public function requestResetPassword(
         Request $request,
@@ -105,7 +122,24 @@ class AuthController extends AbstractController
             'expiresAt' => $resetToken->getExpiresAt()->getTimestamp(),
         ]);
     }
-
+    #[OA\Post(
+        path: '/reset-password',
+        summary: 'Réinitialiser le mot de passe',
+        tags: ['Authentification'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'token', type: 'string'),
+                    new OA\Property(property: 'password', type: 'string')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Mot de passe réinitialisé'),
+            new OA\Response(response: 400, description: 'Token ou mot de passe manquant/invalide')
+        ]
+    )]
     #[Route('/reset-password', name: 'api_reset_password', methods: ['POST'])]
     public function resetPassword(
         Request $request,
