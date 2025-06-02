@@ -1,9 +1,11 @@
 <template>
   <div id="app">
-    <WeatherDisplay />
+    <!-- <WeatherDisplay /> -->
+    <HomeView />
   </div>
 </template>
 
 <script setup>
-import WeatherDisplay from './components/WeatherDisplay.vue'
+// import WeatherDisplay from './components/WeatherDisplay.vue'
+import HomeView from './views/HomeView.vue'
 </script>
