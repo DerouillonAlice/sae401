@@ -1,29 +1,12 @@
 <script setup>
 import WeatherDetailsGrid from '../components/WeatherDetailsGrid.vue'
+import Sidebar from '../components/Sidebar.vue'
 
 </script>
 
 <template>
     <main class="main-layout">
-        <section class="sidebar">
-            <!-- Component -->
-            <div class="city city--sidebar">
-                <h1 class="city__title">Paris</h1>
-                <img class="city__img" src="" alt="">
-            </div>
-            <div class="city city--sidebar">
-                <h1 class="city__title">Troyes</h1>
-                <img class="city__img" src="" alt="">
-            </div>
-            <div class="city city--sidebar">
-                <h1 class="city__title">Reims</h1>
-                <img class="city__img" src="" alt="">
-            </div>
-            <div class="city city--sidebar">
-                <h1 class="city__title">Connectez-vous</h1>
-                <img class="city__img" src="" alt="">
-            </div>
-        </section>
+        <Sidebar />
 
         <!-- routerView -->
         <section class="main-content">
@@ -124,14 +107,7 @@ main {
   display: grid;
   grid-template-columns: 250px 1fr;
   height: 100vh;
-}
-
-main > section:first-of-type {
-  background-color: #f4f4f4;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  background-color: #b46565;
 }
 
 main > section:last-of-type {
