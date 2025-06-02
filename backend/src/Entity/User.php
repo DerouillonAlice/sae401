@@ -11,9 +11,20 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[OA\Schema(
+    schema: "User",
+    properties: [
+        new OA\Property(property: "id", type: "integer"),
+        new OA\Property(property: "firstname", type: "string"),
+        new OA\Property(property: "email", type: "string"),
+        // Ajoutez ici les autres propriétés exposées par "user:read"
+    ],
+    type: "object"
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

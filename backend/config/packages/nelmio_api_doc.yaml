@@ -56,3 +56,5 @@ nelmio_api_doc:
                 - ^/register
                 - ^/request-reset-password
                 - ^/reset-password
+                - ^/user/profile
+                - ^/user/change-password

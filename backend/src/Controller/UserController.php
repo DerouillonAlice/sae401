@@ -9,23 +9,33 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use OpenApi\Attributes as OA;
 
 #[Route('/user')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[OA\Tag(name: 'Utilisateurs')]
 class UserController extends AbstractController
 {
     #[OA\Get(
         path: '/user/profile',
         summary: 'Consulter les informations du profil utilisateur',
         security: [['bearerAuth' => []]],
-        tags: ['Utilisateur'],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Profil utilisateur',
-                content: new OA\JsonContent(ref: '#/components/schemas/User')
+                description: 'Informations complètes de l’utilisateur connecté (nom, email, unités, etc.)',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer'),
+                        new OA\Property(property: 'firstname', type: 'string'),
+                        new OA\Property(property: 'email', type: 'string'),
+                        new OA\Property(property: 'uniteTemperature', type: 'string'),
+                        new OA\Property(property: 'unitePression', type: 'string'),
+                        new OA\Property(property: 'uniteVent', type: 'string'),
+                        new OA\Property(property: 'emailNotification', type: 'string', nullable: true)
+                    ]
+                )
             )
         ]
     )]
@@ -37,9 +47,8 @@ class UserController extends AbstractController
 
     #[OA\Put(
         path: '/user/profile',
-        summary: 'Mettre à jour les préférences et informations utilisateur',
+        summary: 'Mettre à jour les informations du profil (nom, email, unités de mesure...)',
         security: [['bearerAuth' => []]],
-        tags: ['Utilisateur'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -55,7 +64,7 @@ class UserController extends AbstractController
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Profil mis à jour')
+            new OA\Response(response: 200, description: 'Profil mis à jour avec succès')
         ]
     )]
     #[Route('/profile', name: 'user_profile_update', methods: ['PUT'])]
@@ -78,44 +87,36 @@ class UserController extends AbstractController
 
     #[OA\Put(
         path: '/user/change-password',
-        summary: 'Modifier le mot de passe utilisateur',
+        summary: 'Modifier le mot de passe de l’utilisateur connecté',
         security: [['bearerAuth' => []]],
-        tags: ['Utilisateur'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 type: 'object',
                 properties: [
-                    new OA\Property(property: 'currentPassword', type: 'string'),
-                    new OA\Property(property: 'newPassword', type: 'string')
+                    new OA\Property(property: 'password', type: 'string', minLength: 6)
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Mot de passe modifié avec succès'),
-            new OA\Response(response: 400, description: 'Mot de passe actuel incorrect')
+            new OA\Response(response: 200, description: 'Mot de passe mis à jour avec succès'),
+            new OA\Response(response: 400, description: 'Mot de passe trop court ou invalide')
         ]
     )]
     #[Route('/change-password', name: 'user_change_password', methods: ['PUT'])]
-    public function changePassword(
-        Request $request,
-        UserPasswordHasherInterface $passwordHasher,
-        EntityManagerInterface $em
-    ): JsonResponse {
+    public function changePassword(Request $request, EntityManagerInterface $em): JsonResponse
+    {
         $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
 
-        if (empty($data['currentPassword']) || empty($data['newPassword'])) {
-            return $this->json(['error' => 'Champs manquants'], 400);
+        if (empty($data['password']) || strlen($data['password']) < 6) {
+            return $this->json(['error' => 'Le mot de passe doit contenir au moins 6 caractères.'], 400);
         }
 
-        if (!$passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
-            return $this->json(['error' => 'Mot de passe actuel incorrect'], 400);
-        }
-
-        $user->setPassword($passwordHasher->hashPassword($user, $data['newPassword']));
+        $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+        $user->setPassword($hashedPassword);
         $em->flush();
 
-        return $this->json(['message' => 'Mot de passe modifié avec succès']);
+        return $this->json(['message' => 'Mot de passe mis à jour.']);
     }
 }
