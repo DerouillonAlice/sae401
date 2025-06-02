@@ -10,6 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
@@ -22,11 +23,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Firstname is required')]
+    #[Groups(['user:read'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255, unique: true)]
     #[Assert\NotBlank(message: 'Email is required')]
     #[Assert\Email(message: 'Please enter a valid email')]
+    #[Groups(['user:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -39,6 +42,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private bool $isVerified = false;
+
+    #[ORM\Column(length: 10, options: ['default' => 'metric'])]
+    #[Groups(['user:read'])]
+    private ?string $uniteTemperature = 'metric'; // 'metric' ou 'imperial'
+
+    #[ORM\Column(length: 10, options: ['default' => 'hPa'])]
+    #[Groups(['user:read'])]
+    private ?string $unitePression = 'hPa'; // 'hPa' ou 'mmHg'
+
+    #[ORM\Column(length: 10, options: ['default' => 'km/h'])]
+    #[Groups(['user:read'])]
+    private ?string $uniteVent = 'km/h'; // 'km/h' ou 'm/s'
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read'])]
+    private ?string $emailNotification = null;
 
     /**
      * @var Collection<int, Favorite>
@@ -149,6 +168,46 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
+        return $this;
+    }
+
+    public function getUniteTemperature(): ?string
+    {
+        return $this->uniteTemperature;
+    }
+    public function setUniteTemperature(string $unit): static
+    {
+        $this->uniteTemperature = $unit;
+        return $this;
+    }
+
+    public function getUnitePression(): ?string
+    {
+        return $this->unitePression;
+    }
+    public function setUnitePression(string $unit): static
+    {
+        $this->unitePression = $unit;
+        return $this;
+    }
+
+    public function getUniteVent(): ?string
+    {
+        return $this->uniteVent;
+    }
+    public function setUniteVent(string $unit): static
+    {
+        $this->uniteVent = $unit;
+        return $this;
+    }
+
+    public function getEmailNotification(): ?string
+    {
+        return $this->emailNotification;
+    }
+    public function setEmailNotification(?string $email): static
+    {
+        $this->emailNotification = $email;
         return $this;
     }
 }
