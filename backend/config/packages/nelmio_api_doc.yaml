@@ -1,0 +1,60 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Weather App API
+            description: Documentation de l'API météo Symfony
+            version: 1.0.0
+        components:
+            securitySchemes:
+                bearerAuth:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - bearerAuth: []
+        paths:
+            /login_check:
+                post:
+                    tags: [Authentification]
+                    summary: Authentification utilisateur (JWT)
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        username:
+                                            type: string
+                                            example: user@example.com
+                                        password:
+                                            type: string
+                                            example: password123
+                    responses:
+                        '200':
+                            description: Token JWT retourné
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                        '401':
+                            description: Identifiants invalides
+    areas:
+        default:
+            path_patterns:
+                - ^/weather
+                - ^/forecast
+                - ^/daily
+                - ^/search
+                - ^/bycoords
+                - ^/byid
+                - ^/favorites
+                - ^/login_check
+                - ^/register
+                - ^/request-reset-password
+                - ^/reset-password
+                - ^/user/profile
+                - ^/user/change-password
