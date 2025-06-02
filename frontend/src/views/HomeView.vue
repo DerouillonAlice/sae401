@@ -4,99 +4,113 @@ import WeatherDetailsGrid from '../components/WeatherDetailsGrid.vue'
 </script>
 
 <template>
-    <main>
-        <section>
-            <div>
-                <h1>Paris</h1>
+    <main class="main-layout">
+        <section class="sidebar">
+            <!-- Component -->
+            <div class="city city--sidebar">
+                <h1 class="city__title">Paris</h1>
+                <img class="city__img" src="" alt="">
             </div>
-            <div>
-                <h1>Troyes</h1>
+            <div class="city city--sidebar">
+                <h1 class="city__title">Troyes</h1>
+                <img class="city__img" src="" alt="">
             </div>
-            <div>
-                <h1>Reims</h1>
+            <div class="city city--sidebar">
+                <h1 class="city__title">Reims</h1>
+                <img class="city__img" src="" alt="">
             </div>
-            <div>
-                <h1>Connectez-vous</h1>
+            <div class="city city--sidebar">
+                <h1 class="city__title">Connectez-vous</h1>
+                <img class="city__img" src="" alt="">
             </div>
         </section>
 
-        <section>
-            <nav>
-                <form action="">
-                    <label for="">Rechercher une ville</label>
-                    <input type="text" placeholder="Rechercher une ville...">
-                    <button><img src="" alt=""></button>
+        <!-- routerView -->
+        <section class="main-content">
+            <div class="header">
+                <form class="header__search">
+                    <label for="search" class="header__label">Rechercher une ville</label>
+                    <input id="search" type="text" class="header__input" placeholder="Rechercher une ville...">
+                    <button class="header__search-btn">
+                    <img src="" alt="Rechercher">
+                    </button>
                 </form>
-                <button>
-                    <img src="" alt="">
+
+                <button class="header__profile-btn">
+                    <img class="header__profile-icon" src="" alt="Profil">
                 </button>
-            </nav>
-            <section>
-                <h1>Paris</h1>
-                <div>
-                    <input type="checkbox">
-                    <label for="">UV</label>
+            </div>
 
-                    <input type="checkbox">
-                    <label for="">Humidité</label>
+            <section class="filters">
+                <!-- Component -->
+                <h2 class="filters__title">Paris</h2>
+                <div class="filters__options">
+                    <input type="checkbox" class="filters__checkbox">
+                    <label for="" class="filters__label">UV</label>
 
-                    <input type="checkbox">
-                    <label for="">Vent</label>
+                    <input type="checkbox" class="filters__checkbox">
+                    <label for="" class="filters__label">Humidité</label>
 
-                    <input type="checkbox">
-                    <label for="">Visibilité</label>
+                    <input type="checkbox" class="filters__checkbox">
+                    <label for="" class="filters__label">Vent</label>
 
-                    <input type="checkbox">
-                    <label for="">Lever/soleil</label>
+                    <input type="checkbox" class="filters__checkbox">
+                    <label for="" class="filters__label">Visibilité</label>
+
+                    <input type="checkbox" class="filters__checkbox">
+                    <label for="" class="filters__label">Lever/soleil</label>
                 </div>
-                <button>Enregistrer</button>
-                <button>Filtre</button>
+                <button class="filters__save">Enregistrer</button>
+                <button class="filters__toggle">Filtre</button>
             </section>
 
-            <section>
-                <button>Lun</button>
-                <button>Mar</button>
-                <button>Mer</button>
-                <button>Jeu</button>
-                <button>Ven</button>
-                <button>Sam</button>
-                <button>Dim</button>
+            <section class="weekdays">
+                <!-- Component -->
+                <button class="weekdays__day">Lun</button>
+                <button class="weekdays__day">Mar</button>
+                <button class="weekdays__day">Mer</button>
+                <button class="weekdays__day">Jeu</button>
+                <button class="weekdays__day">Ven</button>
+                <button class="weekdays__day">Sam</button>
+                <button class="weekdays__day">Dim</button>
             </section>
 
-            <section>
+            <section class="weather-info">
+                <!-- Component WeatherDetailsGrid.vue -->
                 <div>
-                    <div>
-                        <h2>28°C</h2>
-                        <p>Ressenti: 23°C</p>
-                        <img src="" alt="">
-                        <p>Dernière mise à jour: 19h</p>
+                    <div class="weather-info__summary">
+                        <h2 class="weather-info__temp">28°C</h2>
+                        <p class="weather-info__feels">Ressenti: 23°C</p>
+                        <img class="weather-info__icon" src="" alt="">
+                        <p class="weather-info__update">Dernière mise à jour: 19h</p>
                     </div>
-                    <div>
-                        <div>
-                            <h3>Matin 14°C</h3>
+                    <div class="weather-info__periods">
+                        <div class="weather-info__period">
+                            <h3 class="weather-info__label">Matin 14°C</h3>
                             <img src="" alt="">
                         </div>
-                        <div>
-                            <h3>Midi 14°C</h3>
+                        <div class="weather-info__period">
+                            <h3 class="weather-info__label">Midi 14°C</h3>
                             <img src="" alt="">
                         </div>
-                        <div>
-                            <h3>Soir 14°C</h3>
+                        <div class="weather-info__period">
+                            <h3 class="weather-info__label">Soir 14°C</h3>
                             <img src="" alt="">
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div>
-                        <h3>Coucher du soleil 21h50</h3>
+                <div class="weather-info__details">
+                    <div class="weather-info__param">
+                        <h3 class="weather-info__title">Coucher du soleil 21h50</h3>
+                        <p class="weather-info__text">Lever : 6h20</p>
                     </div>
-                    <div>
-                        <h3>5km/h</h3>
+                    <div class="weather-info__param">
+                        <h3 class="weather-info__title">5km/h</h3>
                     </div>
                     <div>
 
                     </div>
-                    <div class="flex-1 lg:w-2/4">
+                    <div class="weather-info__param flex-1 lg:w-2/4">
                         <WeatherDetailsGrid />
                     </div>
                 </div>
@@ -112,7 +126,6 @@ main {
   height: 100vh;
 }
 
-/* Sidebar */
 main > section:first-of-type {
   background-color: #f4f4f4;
   padding: 1rem;
@@ -121,7 +134,6 @@ main > section:first-of-type {
   gap: 1rem;
 }
 
-/* Contenu principal */
 main > section:last-of-type {
   padding: 1rem;
   display: grid;
