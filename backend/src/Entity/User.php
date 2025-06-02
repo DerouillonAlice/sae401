@@ -43,16 +43,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
-    #[ORM\Column(length: 10, options: ['default' => 'metric'])]
+    #[ORM\Column(length: 10, options: ['default' => 'celsius'])]
     #[Groups(['user:read'])]
-    private ?string $uniteTemperature = 'metric'; // 'metric' ou 'imperial'
+    #[Assert\Choice(choices: ['celsius', 'fahrenheit'], message: 'Choisissez une unité de température valide.')]
+    private ?string $uniteTemperature = 'celsius'; // 'celsius' ou 'fahrenheit'
 
     #[ORM\Column(length: 10, options: ['default' => 'hPa'])]
     #[Groups(['user:read'])]
+    #[Assert\Choice(choices: ['hPa', 'mmHg'], message: 'Choisissez une unité de pression valide.')]
     private ?string $unitePression = 'hPa'; // 'hPa' ou 'mmHg'
 
     #[ORM\Column(length: 10, options: ['default' => 'km/h'])]
     #[Groups(['user:read'])]
+    #[Assert\Choice(choices: ['km/h', 'm/s'], message: 'Choisissez une unité de vent valide.')]
     private ?string $uniteVent = 'km/h'; // 'km/h' ou 'm/s'
 
     #[ORM\Column(length: 255, nullable: true)]
