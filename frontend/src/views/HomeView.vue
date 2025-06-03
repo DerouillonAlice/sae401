@@ -1,11 +1,10 @@
 <script setup>
 import WeatherDetailsGrid from '../components/WeatherDetailsGrid.vue'
-import Sidebar from '../components/Sidebar.vue'
 
 </script>
 
 <template>
-    <main class="main-layout">
+
        
 
         <!-- routerView -->
@@ -99,7 +98,6 @@ import Sidebar from '../components/Sidebar.vue'
                 </div>
             </section>
         </section>
-    </main>
 </template>
 
 <style scoped>
@@ -107,7 +105,7 @@ main {
   display: grid;
   grid-template-columns: 250px 1fr;
   height: 100vh;
-  background-color: #b46565;
+  /* background-color: #b46565; */
 }
 
 main > section:last-of-type {

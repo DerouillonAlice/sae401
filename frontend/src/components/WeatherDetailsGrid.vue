@@ -149,39 +149,58 @@ watch(
   { immediate: true }
 );
 
+let isUpdating = false;
+let updateTimeout;
+
 function updateLayout(newLayout) {
-  const isMobile = window.innerWidth < 640;
+  if (isUpdating) return;
 
-  if (isMobile) {
-    // Pas de correction sur mobile : on garde l’ordre simple vertical
-    layout.value = newLayout.map((item) => ({
-      ...item,
-      x: 0,
-      w: 1,
-      h: 1,
-    }));
-    return;
-  }
+  isUpdating = true;
+  clearTimeout(updateTimeout);
 
-  // Desktop : respecter le layout prédéfini
-  const oldLayout = layout.value.map((l) => ({ ...l }));
-  const activeBlocks = allBlocks.value.filter((b) => b.active);
-  const layoutDef = predefinedLayouts[activeBlocks.length] || [];
+  updateTimeout = setTimeout(() => {
+    const isMobile = window.innerWidth < 640;
 
-  const sortedItems = newLayout.slice().sort((a, b) => a.y - b.y || a.x - b.x);
+    if (isMobile) {
+      const newMobileLayout = newLayout.map((item) => ({
+        ...item,
+        x: 0,
+        w: 1,
+        h: 1,
+      }));
 
-  const correctedLayout = layoutDef.map((slot, index) => {
-    const movedBlock = sortedItems[index];
-    const original = oldLayout.find((l) => l.i === movedBlock.i);
-    return {
-      ...slot,
-      i: movedBlock.i,
-      name: original?.name || 'Bloc',
-    };
-  });
+      if (JSON.stringify(layout.value) !== JSON.stringify(newMobileLayout)) {
+        layout.value = newMobileLayout;
+      }
 
-  layout.value = correctedLayout;
+      isUpdating = false;
+      return;
+    }
+
+    const oldLayout = layout.value.map((l) => ({ ...l }));
+    const activeBlocks = allBlocks.value.filter((b) => b.active);
+    const layoutDef = predefinedLayouts[activeBlocks.length] || [];
+
+    const sortedItems = newLayout.slice().sort((a, b) => a.y - b.y || a.x - b.x);
+
+    const correctedLayout = layoutDef.map((slot, index) => {
+      const movedBlock = sortedItems[index];
+      const original = oldLayout.find((l) => l.i === movedBlock.i);
+      return {
+        ...slot,
+        i: movedBlock.i,
+        name: original?.name || 'Bloc',
+      };
+    });
+
+    if (JSON.stringify(layout.value) !== JSON.stringify(correctedLayout)) {
+      layout.value = correctedLayout;
+    }
+
+    isUpdating = false;
+  }, 50);
 }
+
 </script>
 
 <style scoped>
