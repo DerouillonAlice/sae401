@@ -1,59 +1,61 @@
 <template>
   <div class="flex flex-col h-screen">
     <div class="flex flex-1 overflow-hidden">
-      <!-- Sidebar -->
-      <aside class="w-64 bg-gray-100 p-4 shrink-0">
-        <h2 class="text-lg font-bold mb-4">Favoris</h2>
-        <ul class="space-y-2">
-          <li v-for="block in allBlocks" :key="block.i">
-            <label class="flex items-center gap-2">
-              <input type="checkbox" v-model="block.active" />
-              {{ block.name }}
-            </label>
-          </li>
-        </ul>
-      </aside>
-
       <!-- Main Area -->
       <main class="flex-1 overflow-auto sm:overflow-clip bg-gray-50 p-5">
-        <div class="w-full flex flex-col lg:flex-row gap-4">
-          <!-- Bloc Température -->
-          <div
-            class="lg:w-2/4 w-full my-2 h-[340px] bg-red-100 rounded-lg shadow flex items-center justify-center text-xl font-bold"
-          >
-            🌡️ Température
+        <div class="w-full flex flex-col gap-4">
+          <!-- Filtres en ligne -->
+          <div class="mb-4 flex flex-wrap items-center gap-4">
+            <label
+              v-for="block in allBlocks"
+              :key="block.i"
+              class="flex items-center gap-2 text-sm bg-white px-3 py-2 rounded shadow border"
+            >
+              <input type="checkbox" v-model="block.active" class="accent-blue-500" />
+              {{ block.name }}
+            </label>
           </div>
 
-          <!-- Grid météo -->
-          <div class="flex-1 lg:w-2/4">
-            <GridLayout
-              :layout="layout"
-              :col-num="colNum"
-              :row-height="160"
-              :is-draggable="true"
-              :is-resizable="false"
-              :auto-size="false"
-              :use-css-transforms="false"
-              :vertical-compact="false"
-              :margin="[10, 10]"
-              @layout-updated="updateLayout"
+          <!-- Température + Grid côte à côte -->
+          <div class="w-full flex flex-col lg:flex-row gap-4">
+            <!-- Bloc Température à gauche -->
+            <div
+              class="lg:w-2/4 w-full h-[340px] bg-red-100 rounded-lg shadow flex items-center justify-center text-xl font-bold"
             >
-              <GridItem
-                v-for="item in layout"
-                :key="item.i"
-                :i="item.i"
-                :x="item.x"
-                :y="item.y"
-                :w="item.w"
-                :h="item.h"
+              🌡️ Température
+            </div>
+
+            <!-- Grid météo à droite -->
+            <div class="lg:w-2/4 w-full">
+              <GridLayout
+                :layout="layout"
+                :col-num="colNum"
+                :row-height="160"
+                :is-draggable="true"
+                :is-resizable="false"
+                :auto-size="false"
+                :use-css-transforms="false"
+                :vertical-compact="false"
+                :margin="[10, 10]"
+                @layout-updated="updateLayout"
               >
-                <div
-                  class="h-full flex items-center justify-center bg-blue-100 rounded-lg shadow text-lg font-semibold"
+                <GridItem
+                  v-for="item in layout"
+                  :key="item.i"
+                  :i="item.i"
+                  :x="item.x"
+                  :y="item.y"
+                  :w="item.w"
+                  :h="item.h"
                 >
-                  {{ item.name }}
-                </div>
-              </GridItem>
-            </GridLayout>
+                  <div
+                    class="h-full flex items-center justify-center bg-blue-100 rounded-lg shadow text-lg font-semibold"
+                  >
+                    {{ item.name }}
+                  </div>
+                </GridItem>
+              </GridLayout>
+            </div>
           </div>
         </div>
       </main>
@@ -128,7 +130,6 @@ watch(
     const isMobile = window.innerWidth < 640;
 
     if (isMobile) {
-      // Générer un layout vertical simple pour mobile
       layout.value = activeBlocks.map((block, index) => ({
         i: block.i,
         x: 0,
@@ -138,7 +139,6 @@ watch(
         name: block.name,
       }));
     } else {
-      // Utiliser le layout défini pour desktop
       const config = predefinedLayouts[activeBlocks.length] || [];
       layout.value = config.map((l, index) => ({
         ...l,
@@ -200,7 +200,6 @@ function updateLayout(newLayout) {
     isUpdating = false;
   }, 50);
 }
-
 </script>
 
 <style scoped>
