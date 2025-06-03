@@ -92,7 +92,7 @@ import WeatherDetailsGrid from '../components/WeatherDetailsGrid.vue'
                     <div>
 
                     </div>
-                    <div class="weather-info__param flex-1 lg:w-2/4">
+                    <div class="weather-info__param flex-1 w-full">
                         <WeatherDetailsGrid />
                     </div>
                 </div>
@@ -125,5 +125,15 @@ main > section:last-of-type {
     overflow-x: auto;
   }
 }
+.weather-info__details {
+  display: block;
+  width: 100%;
+}
+.weather-info__param {
+  width: 100% !important;
+  max-width: 100%;
+  flex: none;
+}
+
 
 </style>
