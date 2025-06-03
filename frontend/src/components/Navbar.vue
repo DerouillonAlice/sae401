@@ -24,26 +24,38 @@
 
     <div class="flex-1 flex justify-end">
       <button
+        v-if="auth.isConnected"
         @click="goToProfile"
         class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70  hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
       >
         <UserIcon class="w-6 h-6" />
+      </button>
+      <button
+        v-else
+        @click="goToRegister"
+        class="px-4 py-2 rounded-full bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition-all duration-300"
+      >
+        Inscription
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
-
 import { UserIcon } from '@heroicons/vue/24/solid'
-import {MagnifyingGlassIcon} from '@heroicons/vue/24/outline'
-
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 
 const searchQuery = ref('')
 const router = useRouter()
+const auth = useAuthStore()
+
+onMounted(() => {
+  auth.checkAuth()
+})
 
 const rechercherVille = async () => {
   if (!searchQuery.value.trim()) return
@@ -57,6 +69,10 @@ const rechercherVille = async () => {
 
 const goToProfile = () => {
   router.push({ name: 'ProfilView' })
+}
+
+const goToRegister = () => {
+  router.push({ path: '/register' })
 }
 </script>
 
