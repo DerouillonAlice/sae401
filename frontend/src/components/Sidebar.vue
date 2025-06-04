@@ -35,7 +35,7 @@ const toggleSidebar = () => {
 <template>
     <main class="flex flex-col justify-center py-4  h-full relative">
         <section
-  class="absolute  left-0 grid grid-cols-[1fr_auto] mx-auto gap-2 h-full w-full p-4 rounded-r-xl bg-white/40 backdrop-blur-md shadow-xl transition-transform duration-300 ease-in-out border border-white/70"
+  class="absolute h-[95vh] left-0 grid grid-cols-[1fr_auto] mx-auto gap-2 w-full p-4 rounded-r-xl bg-white/40 backdrop-blur-md shadow-xl transition-transform duration-300 ease-in-out border border-white/70"
 >
 
   <div v-if="isSidebarOpen" class="flex flex-col gap-4">
