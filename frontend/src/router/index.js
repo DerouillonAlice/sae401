@@ -22,6 +22,11 @@ const routes = [
     name: 'InscriptionView',
     component: () => import('@/views/InscriptionView.vue')
   },
+  {
+    path: '/connexion',
+    name: 'ConnexionView',
+    component: () => import('@/views/ConnexionView.vue')
+  }
 ]
 
 const router = createRouter({
