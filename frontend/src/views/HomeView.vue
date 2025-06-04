@@ -1,15 +1,13 @@
 <script setup>
 import WeatherDetailsGrid from '../components/WeatherDetailsGrid.vue'
 import Sidebar from '../components/Sidebar.vue'
-
+import WeekdaysTab from '../components/WeekdaysTab.vue';
 </script>
 
 <template>
-    <main class="main-layout">
-       
-
+    <main class="grid h-screen grid-cols-1">
         <!-- routerView -->
-        <section class="main-content">
+        <section class="grid gap-4 mx-8 grid-rows-[auto_auto_auto_1fr]">
             <div class="header">
                 <form class="header__search">
                     <label for="search" class="header__label">Rechercher une ville</label>
@@ -47,16 +45,7 @@ import Sidebar from '../components/Sidebar.vue'
                 <button class="filters__toggle">Filtre</button>
             </section>
 
-            <section class="weekdays">
-                <!-- Component -->
-                <button class="weekdays__day">Lun</button>
-                <button class="weekdays__day">Mar</button>
-                <button class="weekdays__day">Mer</button>
-                <button class="weekdays__day">Jeu</button>
-                <button class="weekdays__day">Ven</button>
-                <button class="weekdays__day">Sam</button>
-                <button class="weekdays__day">Dim</button>
-            </section>
+            <WeekdaysTab />
 
             <section class="weather-info">
                 <!-- Component WeatherDetailsGrid.vue -->
@@ -101,31 +90,3 @@ import Sidebar from '../components/Sidebar.vue'
         </section>
     </main>
 </template>
-
-<style scoped>
-main {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  height: 100vh;
-  background-color: #b46565;
-}
-
-main > section:last-of-type {
-  padding: 1rem;
-  display: grid;
-  grid-template-rows: auto auto auto 1fr;
-  gap: 1rem;
-}
-
-@media (max-width: 768px) {
-  main {
-    grid-template-columns: 1fr;
-  }
-
-  main > section:first-of-type {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-}
-
-</style>
