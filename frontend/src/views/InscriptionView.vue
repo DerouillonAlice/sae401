@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import { useAuthStore } from '@/stores/auth' // Assurez-vous que le chemin est correct
+import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 
@@ -63,6 +63,12 @@ const submitRegister = async (e) => {
       </button>
       <div v-if="error" class="text-red-600 mt-4 text-center">{{ error }}</div>
       <div v-if="success" class="text-green-600 mt-4 text-center">{{ success }}</div>
+      <div class="mt-6 text-center text-sm text-gray-700">
+        Vous avez déjà un compte ?
+        <router-link to="/connexion" class="text-blue-600 hover:underline font-semibold">
+          Connectez-vous
+        </router-link>
+      </div>
     </form>
   </div>
 </template>

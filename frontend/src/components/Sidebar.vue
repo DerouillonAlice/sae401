@@ -130,7 +130,7 @@ const toggleSidebar = () => {
     </div>
   </template>
 </CityCard>
-
+          <a href="/connexion">
           <CityCard
             v-if="!auth.isConnected"
             name="Connectez-vous pour ajouter vos favoris"
@@ -138,6 +138,7 @@ const toggleSidebar = () => {
             isPlaceholder
             customClass="connect-card"
           />
+        </a>
           <CityCard
             v-if="auth.isConnected"
             name="Ajouter une ville à vos favoris"
