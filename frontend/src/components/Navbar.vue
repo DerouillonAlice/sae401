@@ -72,7 +72,7 @@ const goToProfile = () => {
 }
 
 const goToRegister = () => {
-  router.push({ path: '/register' })
+  router.push({ path: '/inscription' })
 }
 </script>
 
