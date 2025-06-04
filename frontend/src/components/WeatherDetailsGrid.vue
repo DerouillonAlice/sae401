@@ -19,13 +19,19 @@
           <div class="flex flex-col lg:flex-row gap-4 items-start">
             <!-- Bloc Température -->
             <div
-              class="flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between"
+              class="relative flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between overflow-hidden"
               :style="{
                 height: gridHeight ? `${gridHeight}px` : '420px',
                 transition: 'height 0.3s ease'
               }"
             >
-              <div class="flex-1 flex flex-col justify-center items-center text-black text-center">
+              <img
+                src="@/assets/sun.png"
+                alt="Soleil"
+                class="absolute -top-28 -right-60 h-[580px] w-[580px] object-contain pointer-events-none z-0 opacity-90"
+              />
+
+              <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
                   {{ weatherData?.main?.temp ? Math.round(weatherData.main.temp) + '°C' : '—' }}
                 </p>
@@ -33,7 +39,8 @@
                   Ressenti : {{ weatherData?.main?.feels_like ? Math.round(weatherData.main.feels_like) + '°C' : '—' }}
                 </p>
               </div>
-              <div class="mt-4 text-sm font-semibold">
+
+              <div class="mt-4 text-sm font-semibold z-10 relative">
                 Dernière mise à jour : {{ getLastUpdatedHour() }}
               </div>
             </div>
@@ -65,9 +72,14 @@
                   :h="item.h"
                 >
                   <div
-                    class="h-full w-full flex items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-2 border shadow backdrop-blur-sm bg-white/60"
+                    class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border shadow backdrop-blur-sm bg-white/60 space-y-2"
                   >
-                    {{ getBlockContent(item.name) }}
+                    <div class="text-4xl">
+                      <component :is="getIconComponent(item.name)" class="w-10 h-10 text-black" />
+                    </div>
+                    <div>
+                      {{ getBlockContent(item.name) }}
+                    </div>
                   </div>
                 </GridItem>
               </GridLayout>
@@ -82,6 +94,8 @@
 <script setup>
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { GridLayout, GridItem } from 'vue3-grid-layout';
+
+import { CloudRainIcon, DropletIcon, EyeIcon, WindIcon, SunIcon, BarChart3Icon } from 'lucide-vue-next';
 
 const allBlocks = ref([
   { i: '1', name: 'Vent', active: true },
@@ -98,13 +112,25 @@ const endpoint = '/api/weather/Paris';
 function getBlockContent(name) {
   if (!weatherData.value) return name;
   switch (name) {
-    case 'Vent': return `Vent : ${weatherData.value.wind.speed} m/s`;
-    case 'Pression': return `Pression : ${weatherData.value.main.pressure} hPa`;
-    case 'Humidité': return `Humidité : ${weatherData.value.main.humidity} %`;
-    case 'Visibilité': return `Visibilité : ${weatherData.value.visibility / 1000} km`;
-    case 'Nuages': return `Nuages : ${weatherData.value.clouds.all} %`;
-    case 'Rosée': return `Rosée (approximée) : ${weatherData.value.main.temp} °C`;
+    case 'Vent': return `${weatherData.value.wind.speed} m/s`;
+    case 'Pression': return `${weatherData.value.main.pressure} hPa`;
+    case 'Humidité': return `${weatherData.value.main.humidity} %`;
+    case 'Visibilité': return `${weatherData.value.visibility / 1000} km`;
+    case 'Nuages': return `${weatherData.value.clouds.all} %`;
+    case 'Rosée': return `${weatherData.value.main.temp} °C`;
     default: return name;
+  }
+}
+
+function getIconComponent(name) {
+  switch (name) {
+    case 'Vent': return WindIcon;
+    case 'Pression': return BarChart3Icon;
+    case 'Humidité': return DropletIcon;
+    case 'Visibilité': return EyeIcon;
+    case 'Nuages': return CloudRainIcon;
+    case 'Rosée': return SunIcon;
+    default: return SunIcon;
   }
 }
 
@@ -196,16 +222,3 @@ function updateLayout(newLayout) {
   }, 50);
 }
 </script>
-
-<style scoped>
-.vue-grid-item.vue-grid-placeholder {
-  opacity: 0 !important;
-}
-.vue-grid-item {
-  transition: all 0.3s ease;
-}
-.vue-grid-layout {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
-</style>
