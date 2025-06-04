@@ -19,13 +19,23 @@
           <div class="flex flex-col lg:flex-row gap-4 items-start">
             <!-- Bloc Température -->
             <div
-              class="flex-1 bg-red-100 rounded-lg shadow flex items-center justify-center text-xl font-bold"
+              class="flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between"
               :style="{
                 height: gridHeight ? `${gridHeight}px` : '420px',
                 transition: 'height 0.3s ease'
               }"
             >
-              🌡️ Température
+              <div class="flex-1 flex flex-col justify-center items-center text-black text-center">
+                <p class="text-5xl font-extrabold">
+                  {{ weatherData?.main?.temp ? Math.round(weatherData.main.temp) + '°C' : '—' }}
+                </p>
+                <p class="text-xl font-bold mt-2">
+                  Ressenti : {{ weatherData?.main?.feels_like ? Math.round(weatherData.main.feels_like) + '°C' : '—' }}
+                </p>
+              </div>
+              <div class="mt-4 text-sm font-semibold">
+                Dernière mise à jour : {{ getLastUpdatedHour() }}
+              </div>
             </div>
 
             <!-- Grid météo -->
@@ -45,23 +55,21 @@
                 class="h-auto mt-0"
                 @layout-updated="updateLayout"
               >
-              <GridItem
-                v-for="item in layout"
-                :key="item.i"
-                :i="item.i"
-                :x="item.x"
-                :y="item.y"
-                :w="item.w"
-                :h="item.h"
-              >
-                <div
-                  class="h-full w-full flex items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-2
-                        border border-gray-300 backdrop-blur-sm bg-white/60"
+                <GridItem
+                  v-for="item in layout"
+                  :key="item.i"
+                  :i="item.i"
+                  :x="item.x"
+                  :y="item.y"
+                  :w="item.w"
+                  :h="item.h"
                 >
-                  {{ getBlockContent(item.name) }}
-                </div>
-              </GridItem>
-
+                  <div
+                    class="h-full w-full flex items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-2 border shadow backdrop-blur-sm bg-white/60"
+                  >
+                    {{ getBlockContent(item.name) }}
+                  </div>
+                </GridItem>
               </GridLayout>
             </div>
           </div>
@@ -85,62 +93,34 @@ const allBlocks = ref([
 ]);
 
 const weatherData = ref(null);
-
 const endpoint = '/api/weather/Paris';
 
 function getBlockContent(name) {
   if (!weatherData.value) return name;
-
   switch (name) {
-    case 'Vent':
-      return `Vent : ${weatherData.value.wind.speed} m/s`;
-    case 'Pression':
-      return `Pression : ${weatherData.value.main.pressure} hPa`;
-    case 'Humidité':
-      return `Humidité : ${weatherData.value.main.humidity} %`;
-    case 'Visibilité':
-      return `Visibilité : ${weatherData.value.visibility / 1000} km`;
-    case 'Nuages':
-      return `Nuages : ${weatherData.value.clouds.all} %`;
-    case 'Rosée':
-      return `Rosée (approximée) : ${weatherData.value.main.temp} °C`;
-    default:
-      return name;
+    case 'Vent': return `Vent : ${weatherData.value.wind.speed} m/s`;
+    case 'Pression': return `Pression : ${weatherData.value.main.pressure} hPa`;
+    case 'Humidité': return `Humidité : ${weatherData.value.main.humidity} %`;
+    case 'Visibilité': return `Visibilité : ${weatherData.value.visibility / 1000} km`;
+    case 'Nuages': return `Nuages : ${weatherData.value.clouds.all} %`;
+    case 'Rosée': return `Rosée (approximée) : ${weatherData.value.main.temp} °C`;
+    default: return name;
   }
+}
+
+function getLastUpdatedHour() {
+  if (!weatherData.value?.dt) return '—';
+  const date = new Date(weatherData.value.dt * 1000);
+  return `${date.getHours()}h`;
 }
 
 const predefinedLayouts = {
   1: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }],
-  2: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-  ],
-  3: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-    { i: '3', x: 0, y: 1, w: 1, h: 1 },
-  ],
-  4: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-    { i: '3', x: 0, y: 1, w: 1, h: 1 },
-    { i: '4', x: 1, y: 1, w: 1, h: 1 },
-  ],
-  5: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-    { i: '3', x: 2, y: 0, w: 1, h: 1 },
-    { i: '4', x: 0, y: 1, w: 1, h: 1 },
-    { i: '5', x: 1, y: 1, w: 1, h: 1 },
-  ],
-  6: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-    { i: '3', x: 2, y: 0, w: 1, h: 1 },
-    { i: '4', x: 0, y: 1, w: 1, h: 1 },
-    { i: '5', x: 1, y: 1, w: 1, h: 1 },
-    { i: '6', x: 2, y: 1, w: 1, h: 1 },
-  ],
+  2: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }],
+  3: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 0, y: 1, w: 1, h: 1 }],
+  4: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 0, y: 1, w: 1, h: 1 }, { i: '4', x: 1, y: 1, w: 1, h: 1 }],
+  5: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }],
+  6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }],
 };
 
 const layout = ref([]);
@@ -153,12 +133,9 @@ function updateLayoutDimensions() {
   if (gridContainerRef.value) {
     containerWidth.value = gridContainerRef.value.offsetWidth;
     colNum.value = Math.floor(containerWidth.value / 180) || 1;
-
     nextTick(() => {
       const grid = gridContainerRef.value.querySelector('.vue-grid-layout');
-      if (grid) {
-        gridHeight.value = grid.offsetHeight;
-      }
+      if (grid) gridHeight.value = grid.offsetHeight;
     });
   }
 }
@@ -172,7 +149,6 @@ onMounted(() => {
     .then((res) => res.json())
     .then((data) => {
       weatherData.value = data;
-      console.log('Données météo reçues :', data);
     })
     .catch((error) => {
       console.error("Erreur lors de l'appel API :", error);
@@ -188,7 +164,6 @@ watch(
       ...l,
       name: activeBlocks[index]?.name || 'Bloc',
     }));
-
     nextTick(updateLayoutDimensions);
   },
   { immediate: true }
@@ -199,7 +174,6 @@ let updateTimeout;
 
 function updateLayout(newLayout) {
   if (isUpdating) return;
-
   isUpdating = true;
   clearTimeout(updateTimeout);
 
@@ -210,11 +184,7 @@ function updateLayout(newLayout) {
     const correctedLayout = layoutDef.map((slot, index) => {
       const movedBlock = sortedItems[index];
       const original = layout.value.find((l) => l.i === movedBlock.i);
-      return {
-        ...slot,
-        i: movedBlock.i,
-        name: original?.name || 'Bloc',
-      };
+      return { ...slot, i: movedBlock.i, name: original?.name || 'Bloc' };
     });
 
     if (JSON.stringify(layout.value) !== JSON.stringify(correctedLayout)) {
@@ -226,7 +196,6 @@ function updateLayout(newLayout) {
   }, 50);
 }
 </script>
-
 
 <style scoped>
 .vue-grid-item.vue-grid-placeholder {
