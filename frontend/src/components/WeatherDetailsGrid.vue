@@ -45,21 +45,23 @@
                 class="h-auto mt-0"
                 @layout-updated="updateLayout"
               >
-                <GridItem
-                  v-for="item in layout"
-                  :key="item.i"
-                  :i="item.i"
-                  :x="item.x"
-                  :y="item.y"
-                  :w="item.w"
-                  :h="item.h"
+              <GridItem
+                v-for="item in layout"
+                :key="item.i"
+                :i="item.i"
+                :x="item.x"
+                :y="item.y"
+                :w="item.w"
+                :h="item.h"
+              >
+                <div
+                  class="h-full w-full flex items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-2
+                        border border-gray-300 backdrop-blur-sm bg-white/60"
                 >
-                  <div
-                    class="h-full w-full flex items-center justify-center bg-blue-100 rounded-lg shadow text-lg font-semibold"
-                  >
-                    {{ item.name }}
-                  </div>
-                </GridItem>
+                  {{ getBlockContent(item.name) }}
+                </div>
+              </GridItem>
+
               </GridLayout>
             </div>
           </div>
@@ -81,6 +83,31 @@ const allBlocks = ref([
   { i: '5', name: 'Nuages', active: true },
   { i: '6', name: 'Rosée', active: true },
 ]);
+
+const weatherData = ref(null);
+
+const endpoint = '/api/weather/Paris';
+
+function getBlockContent(name) {
+  if (!weatherData.value) return name;
+
+  switch (name) {
+    case 'Vent':
+      return `Vent : ${weatherData.value.wind.speed} m/s`;
+    case 'Pression':
+      return `Pression : ${weatherData.value.main.pressure} hPa`;
+    case 'Humidité':
+      return `Humidité : ${weatherData.value.main.humidity} %`;
+    case 'Visibilité':
+      return `Visibilité : ${weatherData.value.visibility / 1000} km`;
+    case 'Nuages':
+      return `Nuages : ${weatherData.value.clouds.all} %`;
+    case 'Rosée':
+      return `Rosée (approximée) : ${weatherData.value.main.temp} °C`;
+    default:
+      return name;
+  }
+}
 
 const predefinedLayouts = {
   1: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }],
@@ -127,7 +154,6 @@ function updateLayoutDimensions() {
     containerWidth.value = gridContainerRef.value.offsetWidth;
     colNum.value = Math.floor(containerWidth.value / 180) || 1;
 
-    // calcul de la hauteur de la grille
     nextTick(() => {
       const grid = gridContainerRef.value.querySelector('.vue-grid-layout');
       if (grid) {
@@ -141,6 +167,16 @@ onMounted(() => {
   updateLayoutDimensions();
   window.addEventListener('resize', updateLayoutDimensions);
   nextTick(updateLayoutDimensions);
+
+  fetch(endpoint)
+    .then((res) => res.json())
+    .then((data) => {
+      weatherData.value = data;
+      console.log('Données météo reçues :', data);
+    })
+    .catch((error) => {
+      console.error("Erreur lors de l'appel API :", error);
+    });
 });
 
 watch(
@@ -190,6 +226,7 @@ function updateLayout(newLayout) {
   }, 50);
 }
 </script>
+
 
 <style scoped>
 .vue-grid-item.vue-grid-placeholder {
