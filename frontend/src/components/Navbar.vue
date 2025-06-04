@@ -22,21 +22,37 @@
       </div>
     </div>
 
-    <div class="flex-1 flex justify-end">
+    <div class="flex-1 flex justify-end gap-2">
       <button
         v-if="auth.isConnected"
         @click="goToProfile"
-        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70  hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
       >
         <UserIcon class="w-6 h-6" />
       </button>
       <button
-        v-else
-        @click="goToRegister"
-        class="px-4 py-2 rounded-full bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition-all duration-300"
+        v-if="auth.isConnected"
+        @click="logout"
+        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
       >
-        Inscription
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+        </svg>
       </button>
+      <template v-if="!auth.isConnected">
+        <button
+          @click="goToLogin"
+          class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        >
+          Connexion
+        </button>
+        <button
+          @click="goToRegister"
+          class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        >
+          Inscription
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -72,7 +88,18 @@ const goToProfile = () => {
 }
 
 const goToRegister = () => {
-  router.push({ path: '/register' })
+  router.push({ path: '/inscription' })
+}
+
+const goToLogin = () => {
+  router.push({ path: '/connexion' })
+}
+
+const logout = () => {
+  localStorage.removeItem('token')
+  auth.isConnected = false
+  auth.user = null
+  router.push('/')
 }
 </script>
 
