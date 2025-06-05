@@ -20,17 +20,15 @@
             <!-- Bloc Température -->
             <div
               class="relative flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between overflow-hidden"
-              :style="{
-                height: gridHeight ? `${gridHeight}px` : '420px',
-                transition: 'height 0.3s ease'
-              }"
-            >
+              :style="{ height: gridHeight ? `${gridHeight}px` : '520px', transition: 'height 0.3s ease' }"
+              >
               <img
                 src="@/assets/sun.png"
                 alt="Soleil"
                 class="absolute -top-28 -right-60 h-[580px] w-[580px] object-contain pointer-events-none z-0 opacity-90"
               />
 
+              <!-- Température principale -->
               <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
                   {{ weatherData?.main?.temp ? Math.round(weatherData.main.temp) + '°C' : '—' }}
@@ -40,8 +38,26 @@
                 </p>
               </div>
 
+              <!-- Heure de mise à jour -->
               <div class="mt-4 text-sm font-semibold z-10 relative">
                 Dernière mise à jour : {{ getLastUpdatedHour() }}
+              </div>
+
+              <!-- Prévisions intégrées -->
+              <div class="flex w-full mt-6 z-10 relative">
+                <div
+                  v-for="(entry, index) in forecastData"
+                  :key="index"
+                  class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2"
+                >
+                  <div class="text-sm font-bold">{{ entry.label }}</div>
+                  <img
+                    :src="getForecastIcon(entry.icon)"
+                    alt="Icon météo"
+                    class="w-10 h-10 mx-auto object-contain"
+                  />
+                  <div class="text-base font-semibold">{{ Math.round(entry.temp) }}°C</div>
+                </div>
               </div>
             </div>
 
@@ -51,7 +67,7 @@
                 ref="gridLayoutRef"
                 :layout="layout"
                 :col-num="colNum"
-                :row-height="200"
+                :row-height="260"
                 :is-draggable="true"
                 :is-resizable="false"
                 :auto-size="false"
@@ -74,9 +90,7 @@
                   <div
                     class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border shadow backdrop-blur-sm bg-white/60 space-y-2"
                   >
-                    <div class="text-4xl">
-                      <component :is="getIconComponent(item.name)" class="w-10 h-10 text-black" />
-                    </div>
+                    <component :is="getIconComponent(item.name)" class="w-10 h-10 text-black" />
                     <div>
                       {{ getBlockContent(item.name) }}
                     </div>
@@ -94,8 +108,18 @@
 <script setup>
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { GridLayout, GridItem } from 'vue3-grid-layout';
+import {
+  CloudRainIcon,
+  DropletIcon,
+  EyeIcon,
+  WindIcon,
+  SunIcon,
+  BarChart3Icon
+} from 'lucide-vue-next';
 
-import { CloudRainIcon, DropletIcon, EyeIcon, WindIcon, SunIcon, BarChart3Icon } from 'lucide-vue-next';
+import iconLightRain from '@/assets/light-rain.png';
+import iconRain from '@/assets/rain.png';
+import iconSun from '@/assets/sun.png';
 
 const allBlocks = ref([
   { i: '1', name: 'Vent', active: true },
@@ -103,11 +127,11 @@ const allBlocks = ref([
   { i: '3', name: 'Humidité', active: true },
   { i: '4', name: 'Visibilité', active: true },
   { i: '5', name: 'Nuages', active: true },
-  { i: '6', name: 'Rosée', active: true },
+  { i: '6', name: 'Rosée', active: true }
 ]);
 
 const weatherData = ref(null);
-const endpoint = '/api/weather/Paris';
+const forecastData = ref([]);
 
 function getBlockContent(name) {
   if (!weatherData.value) return name;
@@ -134,10 +158,49 @@ function getIconComponent(name) {
   }
 }
 
+function getForecastIcon(code) {
+  if (code?.includes('09')) return iconLightRain;
+  if (code?.includes('10')) return iconRain;
+  if (code?.includes('01')) return iconSun;
+  return iconSun;
+}
+
 function getLastUpdatedHour() {
   if (!weatherData.value?.dt) return '—';
   const date = new Date(weatherData.value.dt * 1000);
   return `${date.getHours()}h`;
+}
+
+function fetchWeather() {
+  fetch('/api/weather/Paris')
+    .then(res => res.json())
+    .then(data => {
+      weatherData.value = data;
+    })
+    .catch(err => console.error("Erreur API weather:", err));
+}
+
+function fetchForecast() {
+  fetch('/api/forecast/paris')
+    .then(res => res.json())
+    .then(data => {
+      const targetHours = {
+        Matin: '09:00:00',
+        Midi: '12:00:00',
+        Soir: '18:00:00',
+      };
+      const today = new Date().toISOString().split('T')[0];
+
+      forecastData.value = Object.entries(targetHours).map(([label, hour]) => {
+        const entry = data.list.find(e => e.dt_txt.includes(`${today} ${hour}`));
+        return {
+          label,
+          temp: entry?.main?.temp ?? null,
+          icon: entry?.weather?.[0]?.icon ?? null,
+        };
+      }).filter(e => e.temp !== null);
+    })
+    .catch(err => console.error("Erreur API forecast:", err));
 }
 
 const predefinedLayouts = {
@@ -146,7 +209,7 @@ const predefinedLayouts = {
   3: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 0, y: 1, w: 1, h: 1 }],
   4: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 0, y: 1, w: 1, h: 1 }, { i: '4', x: 1, y: 1, w: 1, h: 1 }],
   5: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }],
-  6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }],
+  6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }]
 };
 
 const layout = ref([]);
@@ -171,14 +234,8 @@ onMounted(() => {
   window.addEventListener('resize', updateLayoutDimensions);
   nextTick(updateLayoutDimensions);
 
-  fetch(endpoint)
-    .then((res) => res.json())
-    .then((data) => {
-      weatherData.value = data;
-    })
-    .catch((error) => {
-      console.error("Erreur lors de l'appel API :", error);
-    });
+  fetchWeather();
+  fetchForecast();
 });
 
 watch(
@@ -222,3 +279,16 @@ function updateLayout(newLayout) {
   }, 50);
 }
 </script>
+
+<style scoped>
+.vue-grid-item.vue-grid-placeholder {
+  opacity: 0 !important;
+}
+.vue-grid-item {
+  transition: all 0.3s ease;
+}
+.vue-grid-layout {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+</style>
