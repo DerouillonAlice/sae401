@@ -82,7 +82,7 @@ import WeekdaysTab from '../components/WeekdaysTab.vue';
                     <div>
 
                     </div>
-                    <div class="weather-info__param flex-1 lg:w-2/4">
+                    <div class="weather-info__param flex-1 w-full">
                         <WeatherDetailsGrid />
                     </div>
                 </div>
@@ -90,3 +90,4 @@ import WeekdaysTab from '../components/WeekdaysTab.vue';
         </section>
     </main>
 </template>
+
