@@ -1,19 +1,27 @@
 <template>
   <div class="flex flex-col h-screen">
     <div class="flex flex-1 overflow-hidden">
-      <main class="flex-1 overflow-auto sm:overflow-clip bg-gray-50 p-5">
+      <main class="flex-1 overflow-auto sm:overflow-clip p-5">
         <div class="w-full flex flex-col gap-4 max-w-screen-xl mx-auto">
-          <!-- Filtres -->
-          <div class="mb-4 flex flex-wrap items-center gap-4">
-            <label
-              v-for="block in allBlocks"
-              :key="block.i"
-              class="flex items-center gap-2 text-sm bg-white px-3 py-2 rounded shadow border"
-            >
-              <input type="checkbox" v-model="block.active" class="accent-blue-500" />
-              {{ block.name }}
-            </label>
-          </div>
+        <!-- Filtres stylisés sur toute la largeur avec ronds comme dans l'image -->
+        <div class="w-full flex flex-wrap justify-evenly gap-y-6 py-6 px-4 rounded-2xl">
+          <label
+            v-for="block in allBlocks"
+            :key="block.i"
+            class="flex items-center gap-3 text-lg font-medium cursor-pointer text-black"
+          >
+            <input
+              type="checkbox"
+              v-model="block.active"
+              class="peer hidden"
+            />
+            <span
+              class="w-5 h-5 rounded-full border-2 border-white peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
+            ></span>
+            <span class="whitespace-nowrap">{{ block.name }}</span>
+          </label>
+        </div>
+
 
           <!-- Température + Grid côte à côte -->
           <div class="flex flex-col lg:flex-row gap-4 items-start">
@@ -201,19 +209,50 @@ function fetchForecast() {
 }
 
 const predefinedLayouts = {
-  1: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }],
-  2: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }],
-  3: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 0, y: 1, w: 1, h: 1 }],
-  4: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 0, y: 1, w: 1, h: 1 }, { i: '4', x: 1, y: 1, w: 1, h: 1 }],
-  5: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }],
-  6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }]
+  1: [{ i: '1', x: 0, y: 0, w: 3, h: 2 }],
+  2: [
+    { i: '1', x: 0, y: 0, w: 3, h: 1 },
+    { i: '2', x: 0, y: 1, w: 3, h: 1 },
+  ],
+  3: [
+    { i: '1', x: 0, y: 0, w: 1.5, h: 1 },
+    { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 },
+    { i: '3', x: 0, y: 1, w: 3, h: 1 },
+  ],
+  4: [
+    { i: '1', x: 0, y: 0, w: 1.5, h: 1 },
+    { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 },
+    { i: '3', x: 0, y: 1, w: 1.5, h: 1 },
+    { i: '4', x: 1.5, y: 1, w: 1.5, h: 1 },
+  ],
+  5: [
+    { i: '1', x: 0, y: 0, w: 1, h: 1 },
+    { i: '2', x: 1, y: 0, w: 1, h: 1 },
+    { i: '3', x: 2, y: 0, w: 1, h: 1 },
+    { i: '4', x: 0, y: 1, w: 2, h: 1 },
+    { i: '5', x: 2, y: 1, w: 1, h: 1 },
+  ],
+  6: [
+    { i: '1', x: 0, y: 0, w: 1, h: 1 },
+    { i: '2', x: 1, y: 0, w: 1, h: 1 },
+    { i: '3', x: 2, y: 0, w: 1, h: 1 },
+    { i: '4', x: 0, y: 1, w: 1, h: 1 },
+    { i: '5', x: 1, y: 1, w: 1, h: 1 },
+    { i: '6', x: 2, y: 1, w: 1, h: 1 },
+  ],
 };
 
 const layout = ref([]);
 const colNum = ref(3);
-const containerWidth = ref(600);
+
+function updateColNum() {
+  const width = window.innerWidth;
+  colNum.value = width < 640 ? 1 : 3;
+}
 
 onMounted(() => {
+  updateColNum();
+  window.addEventListener('resize', updateColNum);
   fetchWeather();
   fetchForecast();
 });
@@ -222,6 +261,26 @@ watch(
   () => allBlocks.value.map((b) => b.active),
   () => {
     const activeBlocks = allBlocks.value.filter((b) => b.active);
+    const isMobile = window.innerWidth < 640;
+
+    if (isMobile) {
+      // Générer un layout vertical simple pour mobile
+      layout.value = activeBlocks.map((block, index) => ({
+        i: block.i,
+        x: 0,
+        y: index,
+        w: 1,
+        h: 1,
+        name: block.name,
+      }));
+    } else {
+      // Utiliser le layout défini pour desktop
+      const config = predefinedLayouts[activeBlocks.length] || [];
+      layout.value = config.map((l, index) => ({
+        ...l,
+        name: activeBlocks[index]?.name || 'Bloc',
+      }));
+    }
     const config = predefinedLayouts[activeBlocks.length] || [];
     layout.value = config.map((l, index) => ({
       ...l,
@@ -238,6 +297,19 @@ function updateLayout(newLayout) {
   if (isUpdating) return;
   isUpdating = true;
   clearTimeout(updateTimeout);
+
+  const isMobile = window.innerWidth < 640;
+
+if (isMobile) {
+  // Pas de correction sur mobile : on garde l’ordre simple vertical
+  layout.value = newLayout.map((item) => ({
+    ...item,
+    x: 0,
+    w: 1,
+    h: 1,
+  }));
+  return;
+}
 
   updateTimeout = setTimeout(() => {
     const activeBlocks = allBlocks.value.filter((b) => b.active);
