@@ -15,7 +15,7 @@
                 v-model="block.active"
                 class="peer hidden"
               />
-              <span
+                            <span
                 class="w-5 h-5 rounded-full border-2 border-white peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
               ></span>
               <span class="whitespace-nowrap">{{ block.name }}</span>
@@ -29,11 +29,12 @@
               class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden mt-2"
               :style="{ height: '532px', transition: 'height 0.3s ease' }"
             >
-              <img
-                src="@/assets/sun.png"
-                alt="Soleil"
-                class="absolute -top-28 -right-60 h-[580px] w-[580px] object-contain pointer-events-none z-0 opacity-90"
-              />
+            <img
+              :src="imageUrl"
+              alt="Météo"
+              class="absolute -top-28 -right-60 h-[580px] w-[580px] object-contain pointer-events-none z-0 opacity-90"
+            />
+
 
               <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
@@ -125,6 +126,7 @@ import {
 import iconLightRain from '@/assets/light-rain.png';
 import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
+import { useWeatherImage } from '@/composables/useWeatherImage';
 
 const allBlocks = ref([
   { i: '1', name: 'Vent', active: true },
@@ -137,6 +139,7 @@ const allBlocks = ref([
 
 const weatherData = ref(null);
 const forecastData = ref([]);
+const { imageUrl } = useWeatherImage(weatherData);
 
 function getBlockContent(name) {
   if (!weatherData.value) return name;
@@ -181,7 +184,7 @@ function getLastUpdatedHour() {
 }
 
 function fetchWeather() {
-  fetch('/api/weather/Paris')
+  fetch('/api/weather/troyes')
     .then(res => res.json())
     .then(data => {
       weatherData.value = data;
@@ -190,7 +193,7 @@ function fetchWeather() {
 }
 
 function fetchForecast() {
-  fetch('/api/forecast/paris')
+  fetch('/api/forecast/troyes')
     .then(res => res.json())
     .then(data => {
       const targetHours = {
