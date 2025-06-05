@@ -19,16 +19,15 @@
           <div class="flex flex-col lg:flex-row gap-4 items-start">
             <!-- Bloc Température -->
             <div
-              class="relative flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between overflow-hidden"
-              :style="{ height: gridHeight ? `${gridHeight}px` : '520px', transition: 'height 0.3s ease' }"
-              >
+              class="relative flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between overflow-hidden mt-2"
+              :style="{ height: '532px', transition: 'height 0.3s ease' }"
+            >
               <img
                 src="@/assets/sun.png"
                 alt="Soleil"
                 class="absolute -top-28 -right-60 h-[580px] w-[580px] object-contain pointer-events-none z-0 opacity-90"
               />
 
-              <!-- Température principale -->
               <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
                   {{ weatherData?.main?.temp ? Math.round(weatherData.main.temp) + '°C' : '—' }}
@@ -38,12 +37,10 @@
                 </p>
               </div>
 
-              <!-- Heure de mise à jour -->
               <div class="mt-4 text-sm font-semibold z-10 relative">
                 Dernière mise à jour : {{ getLastUpdatedHour() }}
               </div>
 
-              <!-- Prévisions intégrées -->
               <div class="flex w-full mt-6 z-10 relative">
                 <div
                   v-for="(entry, index) in forecastData"
@@ -62,7 +59,7 @@
             </div>
 
             <!-- Grid météo -->
-            <div ref="gridContainerRef" class="flex-1">
+            <div class="flex-1">
               <GridLayout
                 ref="gridLayoutRef"
                 :layout="layout"
@@ -106,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { GridLayout, GridItem } from 'vue3-grid-layout';
 import {
   CloudRainIcon,
@@ -215,25 +212,8 @@ const predefinedLayouts = {
 const layout = ref([]);
 const colNum = ref(3);
 const containerWidth = ref(600);
-const gridHeight = ref(0);
-const gridContainerRef = ref(null);
-
-function updateLayoutDimensions() {
-  if (gridContainerRef.value) {
-    containerWidth.value = gridContainerRef.value.offsetWidth;
-    colNum.value = Math.floor(containerWidth.value / 180) || 1;
-    nextTick(() => {
-      const grid = gridContainerRef.value.querySelector('.vue-grid-layout');
-      if (grid) gridHeight.value = grid.offsetHeight;
-    });
-  }
-}
 
 onMounted(() => {
-  updateLayoutDimensions();
-  window.addEventListener('resize', updateLayoutDimensions);
-  nextTick(updateLayoutDimensions);
-
   fetchWeather();
   fetchForecast();
 });
@@ -247,7 +227,6 @@ watch(
       ...l,
       name: activeBlocks[index]?.name || 'Bloc',
     }));
-    nextTick(updateLayoutDimensions);
   },
   { immediate: true }
 );
@@ -275,7 +254,6 @@ function updateLayout(newLayout) {
     }
 
     isUpdating = false;
-    nextTick(updateLayoutDimensions);
   }, 50);
 }
 </script>
