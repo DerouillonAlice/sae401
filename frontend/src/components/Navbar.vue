@@ -1,6 +1,14 @@
 <template>
-  <div class="p-4 flex items-center gap-4 w-full max-w-7xl mx-auto">
-    <div class="flex-1"></div>
+  <div class="p-4 pl-14 flex items-center justify-between gap-4 w-full mx-auto">
+
+    <div class="flex items-center">
+      <router-link
+        to="/"
+        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+      >
+        <HomeIcon class="w-6 h-6" />
+      </router-link>
+    </div>
 
     <div class="flex items-center gap-2 max-w-xl w-full mx-auto">
       <div class="relative flex-1">
@@ -22,7 +30,7 @@
       </div>
     </div>
 
-    <div class="flex-1 flex justify-end gap-2">
+    <div class="flex items-center gap-2">
       <button
         v-if="auth.isConnected"
         @click="goToProfile"
@@ -64,6 +72,7 @@ import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 import { UserIcon } from '@heroicons/vue/24/solid'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon } from '@heroicons/vue/24/solid'
 
 const searchQuery = ref('')
 const router = useRouter()
