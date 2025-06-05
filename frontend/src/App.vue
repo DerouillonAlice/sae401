@@ -1,5 +1,6 @@
 <script setup>
 import Navbar from './components/Navbar.vue'
+import Footer from './components/Footer.vue'
 import Sidebar from './components/Sidebar.vue'
 import fond from './assets/fond.png'
 import { useSidebar } from './composables/useSidebar'
@@ -22,6 +23,7 @@ const { isSidebarOpen } = useSidebar()
       <Navbar />
       <main class="flex-1 overflow-y-auto p-6">
         <router-view />
+      <Footer class="fixed bottom-0 py-4" />
       </main>
     </div>
   </div>
