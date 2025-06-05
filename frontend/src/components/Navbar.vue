@@ -1,60 +1,119 @@
 <template>
-    <div class=" p-4 shadow-md flex items-center justify-between rounded-2xl">
-      <div class="flex items-center gap-2 w-full max-w-xl">
+  <div class="p-4 pl-14 flex items-center justify-between gap-4 w-full mx-auto">
+
+    <div class="flex items-center">
+      <router-link
+        to="/"
+        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+      >
+        <HomeIcon class="w-6 h-6" />
+      </router-link>
+    </div>
+
+    <div class="flex items-center gap-2 max-w-xl w-full mx-auto">
+      <div class="relative flex-1">
         <input
           v-model="searchQuery"
           @keyup.enter="rechercherVille"
           type="text"
           placeholder="Rechercher une ville ..."
-          class="flex-1 rounded-full px-4 py-2 border border-gray-300 focus:outline-none shadow-inner"
+          class="w-full rounded-full px-8 py-2 pr-12 bg-white/30 backdrop-blur-md shadow-lg border border-white/60 focus:border-indigo-100 focus:ring-1  focus:bg-white/40 transition-all duration-300 ease-in-out outline-none"
         />
         <button
           @click="rechercherVille"
-          class="bg-white hover:bg-gray-100 text-gray-600 p-2 rounded-full shadow-md"
+          type="button"
+          class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent p-0 m-0"
+          tabindex="-1"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-          </svg>
+          <MagnifyingGlassIcon class="w-5 h-5" />
         </button>
       </div>
-  
+    </div>
+
+    <div class="flex items-center gap-2">
       <button
+        v-if="auth.isConnected"
         @click="goToProfile"
-        class="ml-4 p-2 bg-white hover:bg-gray-100 rounded-full shadow-md"
+        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.657 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        <UserIcon class="w-6 h-6" />
+      </button>
+      <button
+        v-if="auth.isConnected"
+        @click="logout"
+        class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
         </svg>
       </button>
+      <template v-if="!auth.isConnected">
+        <button
+          @click="goToLogin"
+          class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        >
+          Connexion
+        </button>
+        <button
+          @click="goToRegister"
+          class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        >
+          Inscription
+        </button>
+      </template>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  import axios from 'axios'
-  
-  const searchQuery = ref('')
-  const router = useRouter()
-  
-  const rechercherVille = async () => {
-    if (!searchQuery.value.trim()) return
-    try {
-      const response = await axios.get(`api/search/${searchQuery.value}`)
-      console.log('Résultats de recherche :', response.data)
-    } catch (error) {
-      console.error('Erreur lors de la recherche de ville :', error)
-    }
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
+import { UserIcon } from '@heroicons/vue/24/solid'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon } from '@heroicons/vue/24/solid'
+
+const searchQuery = ref('')
+const router = useRouter()
+const auth = useAuthStore()
+
+onMounted(() => {
+  auth.checkAuth()
+})
+
+const rechercherVille = async () => {
+  if (!searchQuery.value.trim()) return
+  try {
+    const response = await axios.get(`api/search/${searchQuery.value}`)
+    console.log('Résultats de recherche :', response.data)
+  } catch (error) {
+    console.error('Erreur lors de la recherche de ville :', error)
   }
-  
-  const goToProfile = () => {
-    router.push({ name: 'ProfilView' })
-  }
-  </script>
-  
-  <style scoped>
-  input::placeholder {
-    color: #999;
-  }
-  </style>
-  
+}
+
+const goToProfile = () => {
+  router.push({ name: 'ProfilView' })
+}
+
+const goToRegister = () => {
+  router.push({ path: '/inscription' })
+}
+
+const goToLogin = () => {
+  router.push({ path: '/connexion' })
+}
+
+const logout = () => {
+  localStorage.removeItem('token')
+  auth.isConnected = false
+  auth.user = null
+  router.push('/')
+}
+</script>
+
+<style scoped>
+input::placeholder {
+  color: #999;
+}
+</style>
