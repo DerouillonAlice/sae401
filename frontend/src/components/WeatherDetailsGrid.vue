@@ -3,31 +3,30 @@
     <div class="flex flex-1 overflow-hidden">
       <main class="flex-1 overflow-auto sm:overflow-clip p-5">
         <div class="w-full flex flex-col gap-4 max-w-screen-xl mx-auto">
-        <!-- Filtres stylisés sur toute la largeur avec ronds comme dans l'image -->
-        <div class="w-full flex flex-wrap justify-evenly gap-y-6 py-6 px-4 rounded-2xl">
-          <label
-            v-for="block in allBlocks"
-            :key="block.i"
-            class="flex items-center gap-3 text-lg font-medium cursor-pointer text-black"
-          >
-            <input
-              type="checkbox"
-              v-model="block.active"
-              class="peer hidden"
-            />
-            <span
-              class="w-5 h-5 rounded-full border-2 border-white peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
-            ></span>
-            <span class="whitespace-nowrap">{{ block.name }}</span>
-          </label>
-        </div>
+          <!-- Filtres -->
+          <div class="w-full flex flex-wrap justify-evenly gap-y-6 py-6 px-4 rounded-2xl">
+            <label
+              v-for="block in allBlocks"
+              :key="block.i"
+              class="flex items-center gap-3 text-lg font-medium cursor-pointer text-black"
+            >
+              <input
+                type="checkbox"
+                v-model="block.active"
+                class="peer hidden"
+              />
+              <span
+                class="w-5 h-5 rounded-full border-2 border-white peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
+              ></span>
+              <span class="whitespace-nowrap">{{ block.name }}</span>
+            </label>
+          </div>
 
-
-          <!-- Température + Grid côte à côte -->
+          <!-- Température + Grid -->
           <div class="flex flex-col lg:flex-row gap-4 items-start">
             <!-- Bloc Température -->
             <div
-              class="relative flex-1 rounded-2xl border shadow bg-white p-6 flex flex-col justify-between overflow-hidden mt-2"
+              class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden mt-2"
               :style="{ height: '532px', transition: 'height 0.3s ease' }"
             >
               <img
@@ -55,6 +54,7 @@
                   :key="index"
                   class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2"
                 >
+
                   <div class="text-sm font-bold">{{ entry.label }}</div>
                   <img
                     :src="getForecastIcon(entry.icon)"
@@ -114,12 +114,12 @@
 import { ref, watch, onMounted } from 'vue';
 import { GridLayout, GridItem } from 'vue3-grid-layout';
 import {
-  CloudRainIcon,
+  CloudIcon,
   DropletIcon,
   EyeIcon,
   WindIcon,
   SunIcon,
-  BarChart3Icon
+  BarChart3Icon,
 } from 'lucide-vue-next';
 
 import iconLightRain from '@/assets/light-rain.png';
@@ -132,7 +132,7 @@ const allBlocks = ref([
   { i: '3', name: 'Humidité', active: true },
   { i: '4', name: 'Visibilité', active: true },
   { i: '5', name: 'Nuages', active: true },
-  { i: '6', name: 'Rosée', active: true }
+  { i: '6', name: 'Cycle Soleil', active: true }
 ]);
 
 const weatherData = ref(null);
@@ -146,7 +146,11 @@ function getBlockContent(name) {
     case 'Humidité': return `${weatherData.value.main.humidity} %`;
     case 'Visibilité': return `${weatherData.value.visibility / 1000} km`;
     case 'Nuages': return `${weatherData.value.clouds.all} %`;
-    case 'Rosée': return `${weatherData.value.main.temp} °C`;
+    case 'Cycle Soleil': {
+      const sunrise = new Date(weatherData.value.sys.sunrise * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const sunset = new Date(weatherData.value.sys.sunset * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      return `${sunrise} / ${sunset}`;
+    }
     default: return name;
   }
 }
@@ -157,8 +161,8 @@ function getIconComponent(name) {
     case 'Pression': return BarChart3Icon;
     case 'Humidité': return DropletIcon;
     case 'Visibilité': return EyeIcon;
-    case 'Nuages': return CloudRainIcon;
-    case 'Rosée': return SunIcon;
+    case 'Nuages': return CloudIcon;
+    case 'Cycle Soleil': return SunIcon;
     default: return SunIcon;
   }
 }
@@ -210,36 +214,11 @@ function fetchForecast() {
 
 const predefinedLayouts = {
   1: [{ i: '1', x: 0, y: 0, w: 3, h: 2 }],
-  2: [
-    { i: '1', x: 0, y: 0, w: 3, h: 1 },
-    { i: '2', x: 0, y: 1, w: 3, h: 1 },
-  ],
-  3: [
-    { i: '1', x: 0, y: 0, w: 1.5, h: 1 },
-    { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 },
-    { i: '3', x: 0, y: 1, w: 3, h: 1 },
-  ],
-  4: [
-    { i: '1', x: 0, y: 0, w: 1.5, h: 1 },
-    { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 },
-    { i: '3', x: 0, y: 1, w: 1.5, h: 1 },
-    { i: '4', x: 1.5, y: 1, w: 1.5, h: 1 },
-  ],
-  5: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-    { i: '3', x: 2, y: 0, w: 1, h: 1 },
-    { i: '4', x: 0, y: 1, w: 2, h: 1 },
-    { i: '5', x: 2, y: 1, w: 1, h: 1 },
-  ],
-  6: [
-    { i: '1', x: 0, y: 0, w: 1, h: 1 },
-    { i: '2', x: 1, y: 0, w: 1, h: 1 },
-    { i: '3', x: 2, y: 0, w: 1, h: 1 },
-    { i: '4', x: 0, y: 1, w: 1, h: 1 },
-    { i: '5', x: 1, y: 1, w: 1, h: 1 },
-    { i: '6', x: 2, y: 1, w: 1, h: 1 },
-  ],
+  2: [{ i: '1', x: 0, y: 0, w: 3, h: 1 }, { i: '2', x: 0, y: 1, w: 3, h: 1 }],
+  3: [{ i: '1', x: 0, y: 0, w: 1.5, h: 1 }, { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 }, { i: '3', x: 0, y: 1, w: 3, h: 1 }],
+  4: [{ i: '1', x: 0, y: 0, w: 1.5, h: 1 }, { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 }, { i: '3', x: 0, y: 1, w: 1.5, h: 1 }, { i: '4', x: 1.5, y: 1, w: 1.5, h: 1 }],
+  5: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 2, h: 1 }, { i: '5', x: 2, y: 1, w: 1, h: 1 }],
+  6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }]
 };
 
 const layout = ref([]);
@@ -257,38 +236,27 @@ onMounted(() => {
   fetchForecast();
 });
 
-watch(
-  () => allBlocks.value.map((b) => b.active),
-  () => {
-    const activeBlocks = allBlocks.value.filter((b) => b.active);
-    const isMobile = window.innerWidth < 640;
+watch(() => allBlocks.value.map((b) => b.active), () => {
+  const activeBlocks = allBlocks.value.filter((b) => b.active);
+  const isMobile = window.innerWidth < 640;
 
-    if (isMobile) {
-      // Générer un layout vertical simple pour mobile
-      layout.value = activeBlocks.map((block, index) => ({
-        i: block.i,
-        x: 0,
-        y: index,
-        w: 1,
-        h: 1,
-        name: block.name,
-      }));
-    } else {
-      // Utiliser le layout défini pour desktop
-      const config = predefinedLayouts[activeBlocks.length] || [];
-      layout.value = config.map((l, index) => ({
-        ...l,
-        name: activeBlocks[index]?.name || 'Bloc',
-      }));
-    }
+  if (isMobile) {
+    layout.value = activeBlocks.map((block, index) => ({
+      i: block.i,
+      x: 0,
+      y: index,
+      w: 1,
+      h: 1,
+      name: block.name,
+    }));
+  } else {
     const config = predefinedLayouts[activeBlocks.length] || [];
     layout.value = config.map((l, index) => ({
       ...l,
       name: activeBlocks[index]?.name || 'Bloc',
     }));
-  },
-  { immediate: true }
-);
+  }
+}, { immediate: true });
 
 let isUpdating = false;
 let updateTimeout;
@@ -300,16 +268,10 @@ function updateLayout(newLayout) {
 
   const isMobile = window.innerWidth < 640;
 
-if (isMobile) {
-  // Pas de correction sur mobile : on garde l’ordre simple vertical
-  layout.value = newLayout.map((item) => ({
-    ...item,
-    x: 0,
-    w: 1,
-    h: 1,
-  }));
-  return;
-}
+  if (isMobile) {
+    layout.value = newLayout.map((item) => ({ ...item, x: 0, w: 1, h: 1 }));
+    return;
+  }
 
   updateTimeout = setTimeout(() => {
     const activeBlocks = allBlocks.value.filter((b) => b.active);
