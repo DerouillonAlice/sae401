@@ -23,7 +23,7 @@ const { isSidebarOpen } = useSidebar()
       <Navbar />
       <main class="flex-1 overflow-y-auto p-6">
         <router-view />
-      <Footer class="fixed bottom-0 py-4" />
+      <Footer class="bottom-0 pt-4" />
       </main>
     </div>
   </div>
