@@ -9,9 +9,11 @@ import rainImg from '../assets/rain.png'
 import fond from '../assets/fond.png'
 import lightRainImg from '../assets/light-rain.png'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const { isSidebarOpen } = useSidebar()
 const auth = useAuthStore()
+const router = useRouter()
 
 const grandesVilles = [
   { name: 'Paris' },
@@ -191,6 +193,17 @@ const removeFavorite = async (favoriteId) => {
   }
 }
 
+function goToCity(cityName) {
+  // Ajoute un paramètre bidon pour forcer le refresh même si la ville ne change pas
+  router.push({ 
+    name: 'HomeView', 
+    query: { 
+      ville: cityName, 
+      t: Date.now() // paramètre unique à chaque clic
+    } 
+  })
+}
+
 const MAX_FAVORITES = 7
 const hasReachedFavoriteLimit = computed(() => auth.isConnected && favoris.value.length >= MAX_FAVORITES)
 </script>
@@ -208,6 +221,7 @@ const hasReachedFavoriteLimit = computed(() => auth.isConnected && favoris.value
   :name="city.name"
   :removable="auth.isConnected"
   @remove="removeFavorite(city.id)"
+  @click="goToCity(city.name)"
 >
   <template #default>
     <div>
