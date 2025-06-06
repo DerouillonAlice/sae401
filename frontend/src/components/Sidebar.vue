@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
 import sunImg from '../assets/sun.png'
 import rainImg from '../assets/rain.png'
+import fond from '../assets/fond.png'
 import lightRainImg from '../assets/light-rain.png'
 import axios from 'axios'
 
@@ -56,7 +57,7 @@ const fetchFavoris = async () => {
   try {
     const token = localStorage.getItem('token')
     if (!token) return
-    const res = await axios.get('http://localhost:8319/api/favorites', {
+    const res = await axios.get('/api/favorites', {
       headers: { Authorization: `Bearer ${token}` }
     })
     favoris.value = res.data
@@ -83,8 +84,9 @@ watch(
 )
 
 const cities = computed(() => {
-  const list = auth.isConnected
+  return auth.isConnected
     ? favoris.value.map(fav => ({
+        id: fav.id,
         name: fav.city,
         meteo: meteoFavoris.value[fav.city],
         imageSrc: getWeatherIcon(meteoFavoris.value[fav.city])
@@ -94,14 +96,103 @@ const cities = computed(() => {
         meteo: meteoVilles.value[ville.name],
         imageSrc: getWeatherIcon(meteoVilles.value[ville.name])
       }))
-
-  return list
 })
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
 }
 
+const showAddFavorite = ref(false)
+const newFavoriteCity = ref('')
+const addFavoriteError = ref('')
+const addFavoriteSuccess = ref('')
+const selectedCity = ref(null)
+const searchResults = ref([])
+const isSearching = ref(false)
+
+function openAddFavoriteModal() {
+  showAddFavorite.value = true
+  newFavoriteCity.value = ''
+  searchResults.value = []
+  selectedCity.value = null
+  addFavoriteError.value = ''
+  addFavoriteSuccess.value = ''
+}
+
+async function submitAddFavorite() {
+  addFavoriteError.value = ''
+  addFavoriteSuccess.value = ''
+  if (favoris.value.length >= MAX_FAVORITES) {
+    addFavoriteError.value = "Vous ne pouvez pas avoir plus de 7 favoris."
+    return
+  }
+  if (!selectedCity.value) {
+    addFavoriteError.value = "Veuillez sélectionner une ville dans la liste."
+    return
+  }
+  // Vérifie si la ville est déjà dans les favoris
+  const alreadyExists = favoris.value.some(
+    fav => fav.city.toLowerCase() === selectedCity.value.name.toLowerCase()
+  )
+  if (alreadyExists) {
+    addFavoriteError.value = "Cette ville est déjà dans vos favoris."
+    return
+  }
+  try {
+    const token = localStorage.getItem('token')
+    await axios.post('/api/favorites',
+      {
+        city: selectedCity.value.name,
+        latitude: selectedCity.value.latitude ?? 0,
+        longitude: selectedCity.value.longitude ?? 0
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    addFavoriteSuccess.value = 'Favori ajouté !'
+    showAddFavorite.value = false
+    fetchFavoris()
+  } catch (err) {
+    addFavoriteError.value = err.response?.data?.error || 'Erreur lors de l\'ajout'
+  }
+}
+
+watch(newFavoriteCity, async (val) => {
+  if (!val || val.length < 2) {
+    searchResults.value = []
+    return
+  }
+  isSearching.value = true
+  try {
+    const res = await axios.get(`/api/search/${encodeURIComponent(val)}`)
+    searchResults.value = res.data
+  } catch {
+    searchResults.value = []
+  }
+  isSearching.value = false
+})
+
+const selectCity = (city) => {
+  selectedCity.value = city
+  newFavoriteCity.value = city.name
+  searchResults.value = []
+}
+
+const removeFavorite = async (favoriteId) => {
+  try {
+    const token = localStorage.getItem('token')
+    const url = `/api/favorites/${favoriteId}`
+    await axios.delete(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    favoris.value = favoris.value.filter(fav => fav.id !== favoriteId)
+  } catch (err) {
+    console.error('Erreur lors de la suppression du favori:', err)
+    console.error('Réponse:', err.response?.data)
+  }
+}
+
+const MAX_FAVORITES = 7
+const hasReachedFavoriteLimit = computed(() => auth.isConnected && favoris.value.length >= MAX_FAVORITES)
 </script>
 
 <template>
@@ -113,8 +204,10 @@ const toggleSidebar = () => {
         <TransitionGroup name="fade" tag="div" class="contents">
           <CityCard
   v-for="city in cities"
-  :key="city.name"
+  :key="city.id"
   :name="city.name"
+  :removable="auth.isConnected"
+  @remove="removeFavorite(city.id)"
 >
   <template #default>
     <div>
@@ -140,10 +233,11 @@ const toggleSidebar = () => {
           />
         </a>
           <CityCard
-            v-if="auth.isConnected"
+            v-if="auth.isConnected && !hasReachedFavoriteLimit"
             name="Ajouter une ville à vos favoris"
             isPlaceholder
             customClass="connect-card"
+            @click="openAddFavoriteModal"
           />
         </TransitionGroup>
       </div>
@@ -160,9 +254,68 @@ const toggleSidebar = () => {
         </button>
       </div>
     </section>
+
+    <transition name="fade">
+  <div
+    v-if="showAddFavorite"
+    class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
+    
+  >
+    <div class=" backdrop-blur-lg bg-white/40 rounded-2xl shadow-xl  w-full max-w-sm text-gray-800"
+    :style="{ backgroundImage: `url('${fond}')` }">
+    <div class="overlay bg-white/50  inset-0 w-full h-full rounded-2xl p-6">
+
+      <h3 class="text-xl font-semibold mb-4 text-center">Ajouter une ville à vos favoris</h3>
+
+      <input
+        v-model="newFavoriteCity"
+        type="text"
+        placeholder="Nom de la ville"
+        class="w-full px-4 py-2 rounded-xl shadow bg-white placeholder-gray-500 focus:outline-none mb-2"
+      />
+
+      <ul
+        v-if="searchResults.length"
+        class="bg-white border rounded-xl shadow-inner max-h-40 overflow-y-auto mb-4"
+      >
+        <li
+          v-for="city in searchResults"
+          :key="city.id"
+          @click="selectCity(city)"
+          class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition rounded"
+        >
+          {{ city.name }} <span v-if="city.country">({{ city.country }})</span>
+        </li>
+      </ul>
+
+      <div class="flex gap-2 justify-end">
+        <button
+          @click="submitAddFavorite"
+          class="bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition font-semibold"
+        >
+          Ajouter
+        </button>
+        <button
+          @click="showAddFavorite = false"
+          class="bg-white px-4 py-2 rounded-xl shadow hover:bg-gray-100 transition"
+        >
+          Annuler
+        </button>
+      </div>
+
+      <div v-if="addFavoriteError" class="text-red-600 mt-3 text-sm text-center">
+        {{ addFavoriteError }}
+      </div>
+      <div v-if="addFavoriteSuccess" class="text-green-600 mt-3 text-sm text-center">
+        {{ addFavoriteSuccess }}
+      </div>
+    </div>
+  </div>
+  </div>
+</transition>
+
   </main>
 </template>
-
 <style scoped>
 
 </style>
