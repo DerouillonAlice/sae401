@@ -112,21 +112,87 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { GridLayout, GridItem } from 'vue3-grid-layout';
+import { ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { GridLayout, GridItem } from 'vue3-grid-layout'
 import {
   CloudIcon,
   DropletIcon,
   EyeIcon,
   WindIcon,
   SunIcon,
-  BarChart3Icon,
-} from 'lucide-vue-next';
+  BarChart3Icon
+} from 'lucide-vue-next'
 
 import iconLightRain from '@/assets/light-rain.png';
 import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
 import { useWeatherImage } from '@/composables/useWeatherImage';
+
+const route = useRoute()
+const weatherData = ref(null)
+const forecastData = ref([])
+
+function fetchWeather() {
+  const ville = route.query.ville || 'Paris'
+  fetch(`/api/weather/${encodeURIComponent(ville)}`)
+    .then(res => res.json())
+    .then(data => { weatherData.value = data })
+}
+
+function fetchForecast() {
+  const ville = route.query.ville || 'Paris'
+  fetch(`/api/forecast/${encodeURIComponent(ville)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data.list)) {
+        // Cherche les entrées pour 10h, 14h et 21h
+        const getHourEntry = (hour) =>
+          data.list.find(item => item.dt_txt && item.dt_txt.includes(` ${hour}:00:00`))
+
+        const matin = getHourEntry('10')
+        const apresmidi = getHourEntry('14')
+        const soir = getHourEntry('21')
+
+        forecastData.value = [
+          matin && {
+            label: 'Matin',
+            temp: matin.main?.temp,
+            icon: matin.weather?.[0]?.icon
+          },
+          apresmidi && {
+            label: 'Après-midi',
+            temp: apresmidi.main?.temp,
+            icon: apresmidi.weather?.[0]?.icon
+          },
+          soir && {
+            label: 'Soir',
+            temp: soir.main?.temp,
+            icon: soir.weather?.[0]?.icon
+          }
+        ].filter(Boolean)
+      } else if (Array.isArray(data)) {
+        forecastData.value = data
+      } else {
+        forecastData.value = []
+      }
+    })
+}
+
+watch(
+  () => route.query.ville,
+  () => {
+    fetchWeather()
+    fetchForecast()
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  fetchWeather()
+  fetchForecast()
+})
+
 
 const allBlocks = ref([
   { i: '1', name: 'Vent', active: true },
@@ -137,12 +203,9 @@ const allBlocks = ref([
   { i: '6', name: 'Cycle Soleil', active: true }
 ]);
 
-const weatherData = ref(null);
-const forecastData = ref([]);
-const { imageUrl } = useWeatherImage(weatherData);
 
 function getBlockContent(name) {
-  if (!weatherData.value) return name;
+  if (!weatherData.value) return name
   switch (name) {
     case 'Vent': return `${weatherData.value.wind.speed} m/s`;
     case 'Pression': return `${weatherData.value.main.pressure} hPa`;
@@ -171,48 +234,16 @@ function getIconComponent(name) {
 }
 
 function getForecastIcon(code) {
-  if (code?.includes('09')) return iconLightRain;
-  if (code?.includes('10')) return iconRain;
-  if (code?.includes('01')) return iconSun;
-  return iconSun;
+  if (code?.includes('09')) return iconLightRain
+  if (code?.includes('10')) return iconRain
+  if (code?.includes('01')) return iconSun
+  return iconSun
 }
 
 function getLastUpdatedHour() {
-  if (!weatherData.value?.dt) return '—';
-  const date = new Date(weatherData.value.dt * 1000);
-  return `${date.getHours()}h`;
-}
-
-function fetchWeather() {
-  fetch('/api/weather/troyes')
-    .then(res => res.json())
-    .then(data => {
-      weatherData.value = data;
-    })
-    .catch(err => console.error("Erreur API weather:", err));
-}
-
-function fetchForecast() {
-  fetch('/api/forecast/troyes')
-    .then(res => res.json())
-    .then(data => {
-      const targetHours = {
-        Matin: '09:00:00',
-        Midi: '12:00:00',
-        Soir: '18:00:00',
-      };
-      const today = new Date().toISOString().split('T')[0];
-
-      forecastData.value = Object.entries(targetHours).map(([label, hour]) => {
-        const entry = data.list.find(e => e.dt_txt.includes(`${today} ${hour}`));
-        return {
-          label,
-          temp: entry?.main?.temp ?? null,
-          icon: entry?.weather?.[0]?.icon ?? null,
-        };
-      }).filter(e => e.temp !== null);
-    })
-    .catch(err => console.error("Erreur API forecast:", err));
+  if (!weatherData.value?.dt) return '—'
+  const date = new Date(weatherData.value.dt * 1000)
+  return `${date.getHours()}h`
 }
 
 const predefinedLayouts = {
@@ -222,7 +253,7 @@ const predefinedLayouts = {
   4: [{ i: '1', x: 0, y: 0, w: 1.5, h: 1 }, { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 }, { i: '3', x: 0, y: 1, w: 1.5, h: 1 }, { i: '4', x: 1.5, y: 1, w: 1.5, h: 1 }],
   5: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 2, h: 1 }, { i: '5', x: 2, y: 1, w: 1, h: 1 }],
   6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }]
-};
+}
 
 const layout = ref([]);
 const colNum = ref(3);
@@ -261,8 +292,8 @@ watch(() => allBlocks.value.map((b) => b.active), () => {
   }
 }, { immediate: true });
 
-let isUpdating = false;
-let updateTimeout;
+let isUpdating = false
+let updateTimeout
 
 function updateLayout(newLayout) {
   if (isUpdating) return;
@@ -277,21 +308,21 @@ function updateLayout(newLayout) {
   }
 
   updateTimeout = setTimeout(() => {
-    const activeBlocks = allBlocks.value.filter((b) => b.active);
-    const layoutDef = predefinedLayouts[activeBlocks.length] || [];
-    const sortedItems = newLayout.slice().sort((a, b) => a.y - b.y || a.x - b.x);
+    const activeBlocks = allBlocks.value.filter((b) => b.active)
+    const layoutDef = predefinedLayouts[activeBlocks.length] || []
+    const sortedItems = newLayout.slice().sort((a, b) => a.y - b.y || a.x - b.x)
     const correctedLayout = layoutDef.map((slot, index) => {
-      const movedBlock = sortedItems[index];
-      const original = layout.value.find((l) => l.i === movedBlock.i);
-      return { ...slot, i: movedBlock.i, name: original?.name || 'Bloc' };
-    });
+      const movedBlock = sortedItems[index]
+      const original = layout.value.find((l) => l.i === movedBlock.i)
+      return { ...slot, i: movedBlock.i, name: original?.name || 'Bloc' }
+    })
 
     if (JSON.stringify(layout.value) !== JSON.stringify(correctedLayout)) {
-      layout.value = correctedLayout;
+      layout.value = correctedLayout
     }
 
-    isUpdating = false;
-  }, 50);
+    isUpdating = false
+  }, 50)
 }
 </script>
 

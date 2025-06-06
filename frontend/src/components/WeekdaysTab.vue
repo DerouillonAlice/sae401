@@ -16,7 +16,7 @@ const selectDay = (index: number) => {
 </script>
 
 <template>
-  <section class="flex w-full bg-white/40 backdrop-blur-md rounded-md shadow overflow-hidden backdrop-blur-md shadow-xl">
+  <section class="flex w-full bg-white/40 backdrop-blur-md rounded-md shadow overflow-hidden backdrop-blur-md shadow-xl  border border-white/70">
     <button
       v-for="(day, index) in days"
       :key="day"
