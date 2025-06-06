@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { PlusCircleIcon } from '@heroicons/vue/24/solid'
+import { PlusCircleIcon, XMarkIcon } from '@heroicons/vue/24/solid'
+
+const emit = defineEmits(['remove'])
 
 defineProps<{
   name: string
   imageSrc?: string
   isPlaceholder?: boolean
   customClass?: string
+  removable?: boolean
 }>()
-
 </script>
 
 <template>
@@ -34,6 +36,15 @@ defineProps<{
         class="size-10 object-contain ml-auto"
       />
     </div>
+
+    <button
+      v-if="removable"
+      @click.stop="emit('remove')"
+      class="absolute top-1 right-1 p-1 rounded-full  transition"
+      title="Retirer des favoris"
+    >
+      <XMarkIcon class="w-5 h-5 text-black hover:text-black/60" />
+    </button>
 
     <div class="mt-1 w-full">
       <slot />
