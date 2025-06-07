@@ -54,10 +54,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isVerified = false;
 
-    #[ORM\Column(length: 10, options: ['default' => 'celsius'])]
+    #[ORM\Column(length: 10, options: ['default' => 'Celsius'])]
     #[Groups(['user:read'])]
-    #[Assert\Choice(choices: ['celsius', 'fahrenheit'], message: 'Choisissez une unité de température valide.')]
-    private ?string $uniteTemperature = 'celsius'; // 'celsius' ou 'fahrenheit'
+    #[Assert\Choice(choices: ['Celsius', 'Fahrenheit'], message: 'Choisissez une unité de température valide.')]
+    private ?string $uniteTemperature = 'Celsius'; // 'celsius' ou 'fahrenheit'
 
     #[ORM\Column(length: 10, options: ['default' => 'hPa'])]
     #[Groups(['user:read'])]
