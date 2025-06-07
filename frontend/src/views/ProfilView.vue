@@ -83,6 +83,37 @@
           </div>
         </div>
       </form>
+
+      <!-- Formulaire de modification du mot de passe -->
+      <form @submit.prevent="changePassword" class="space-y-4 mt-8">
+        <h3 class="text-xl font-bold mb-4">Modifier le mot de passe</h3>
+        <div>
+          <label class="font-semibold">Ancien mot de passe</label>
+          <input
+            v-model="oldPassword"
+            type="password"
+            class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+            required
+          />
+        </div>
+        <div>
+          <label class="font-semibold">Nouveau mot de passe</label>
+          <input
+            v-model="newPassword"
+            type="password"
+            class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-black text-white py-2 rounded-xl font-bold hover:bg-gray-800 transition"
+        >
+          Modifier le mot de passe
+        </button>
+        <div v-if="passwordError" class="text-red-600 mt-4 text-center">{{ passwordError }}</div>
+        <div v-if="passwordSuccess" class="text-green-600 mt-4 text-center">{{ passwordSuccess }}</div>
+      </form>
     </div>
   </div>
 </template>
@@ -95,6 +126,10 @@ const user = ref({})
 const loading = ref(true)
 const error = ref('')
 const success = ref('')
+const oldPassword = ref('')
+const newPassword = ref('')
+const passwordError = ref('')
+const passwordSuccess = ref('')
 
 onMounted(async () => {
   try {
@@ -137,6 +172,33 @@ const updateProfile = async () => {
     // Efface le message d'erreur après 3 secondes
     setTimeout(() => {
       error.value = ''
+    }, 3000)
+  }
+}
+
+const changePassword = async () => {
+  passwordError.value = ''
+  passwordSuccess.value = ''
+  try {
+    await axios.post('/api/user/change-password', {
+      oldPassword: oldPassword.value,
+      newPassword: newPassword.value
+    }, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    passwordSuccess.value = 'Mot de passe modifié avec succès !'
+    oldPassword.value = ''
+    newPassword.value = ''
+    setTimeout(() => {
+      passwordSuccess.value = ''
+    }, 3000)
+  } catch (e) {
+    console.error('Erreur lors de la modification du mot de passe :', e)
+    passwordError.value = e.response?.data?.message || "Impossible de modifier le mot de passe"
+    setTimeout(() => {
+      passwordError.value = ''
     }, 3000)
   }
 }

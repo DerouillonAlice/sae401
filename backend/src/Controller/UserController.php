@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use OpenApi\Attributes as OA;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/user')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
@@ -103,20 +104,32 @@ class UserController extends AbstractController
             new OA\Response(response: 400, description: 'Mot de passe trop court ou invalide')
         ]
     )]
-    #[Route('/change-password', name: 'user_change_password', methods: ['PUT'])]
-    public function changePassword(Request $request, EntityManagerInterface $em): JsonResponse
+    #[Route('/change-password', name: 'user_change_password', methods: ['POST'])]
+    public function changePassword(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): JsonResponse
     {
         $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
 
-        if (empty($data['password']) || strlen($data['password']) < 6) {
-            return $this->json(['error' => 'Le mot de passe doit contenir au moins 6 caractères.'], 400);
+        // Vérifiez si l'ancien mot de passe est fourni
+        if (empty($data['oldPassword']) || empty($data['newPassword'])) {
+            return $this->json(['error' => 'Les champs ancien mot de passe et nouveau mot de passe sont requis.'], 400);
         }
 
-        $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+        // Vérifiez si l'ancien mot de passe est correct
+        if (!$passwordHasher->isPasswordValid($user, $data['oldPassword'])) {
+            return $this->json(['error' => 'L\'ancien mot de passe est incorrect.'], 400);
+        }
+
+        // Vérifiez la longueur du nouveau mot de passe
+        if (strlen($data['newPassword']) < 6) {
+            return $this->json(['error' => 'Le nouveau mot de passe doit contenir au moins 6 caractères.'], 400);
+        }
+
+        // Hachez et mettez à jour le nouveau mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($user, $data['newPassword']);
         $user->setPassword($hashedPassword);
         $em->flush();
 
-        return $this->json(['message' => 'Mot de passe mis à jour.']);
+        return $this->json(['message' => 'Mot de passe mis à jour avec succès.']);
     }
 }
