@@ -1,40 +1,38 @@
 <template>
-  <div class="flex flex-col h-screen">
+  <div class="flex flex-col ">
     <div class="flex flex-1 overflow-hidden">
-      <main class="flex-1 overflow-auto sm:overflow-clip p-5">
-        <div class="w-full flex flex-col gap-4 max-w-screen-xl mx-auto">
+      <main class="flex-1 overflow-auto sm:overflow-clip">
+        <div class="w-full flex flex-col gap-4 mx-auto">
           <!-- Filtres -->
-          <div class="w-full flex flex-wrap justify-evenly gap-y-6 py-6 px-4 rounded-2xl">
+          <div class="w-full flex flex-wrap justify-evenly gap-y-4 py-4 px-2 rounded-xl">
             <label
               v-for="block in allBlocks"
               :key="block.i"
-              class="flex items-center gap-3 text-lg font-medium cursor-pointer text-black"
+              class="flex items-center gap-2 text-sm font-medium cursor-pointer text-black"
             >
               <input
                 type="checkbox"
                 v-model="block.active"
                 class="peer hidden"
               />
-                            <span
-                class="w-5 h-5 rounded-full border-2 border-white peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
+              <span
+                class="w-4 h-4 rounded-full border-2 border-gray-300 peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
               ></span>
               <span class="whitespace-nowrap">{{ block.name }}</span>
             </label>
           </div>
 
           <!-- Température + Grid -->
-          <div class="flex flex-col lg:flex-row gap-4 items-start">
+          <div class="flex flex-col lg:flex-row gap-4 items-stretch">
             <!-- Bloc Température -->
             <div
-              class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden mt-2"
-              :style="{ height: '532px', transition: 'height 0.3s ease' }"
+              class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden"
             >
             <img
               :src="imageUrl"
               alt="Météo"
-              class="absolute -top-28 -right-60 h-[580px] w-[580px] object-contain pointer-events-none z-0 opacity-90"
+              class="absolute -top-28 -right-60 max-h-[580px] max-w-[580px] object-contain pointer-events-none z-0 opacity-90"
             />
-
 
               <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
@@ -73,15 +71,14 @@
                 ref="gridLayoutRef"
                 :layout="layout"
                 :col-num="colNum"
-                :row-height="260"
+                :row-height="auto"
                 :is-draggable="true"
                 :is-resizable="false"
-                :auto-size="false"
+                :auto-size="true"
                 :use-css-transforms="false"
                 :vertical-compact="false"
-                :margin="[10, 10]"
                 :width="containerWidth"
-                class="h-auto mt-0"
+                class="h-full gap-4 mt-0"
                 @layout-updated="updateLayout"
               >
                 <GridItem
@@ -94,7 +91,7 @@
                   :h="item.h"
                 >
                   <div
-                    class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border shadow backdrop-blur-sm bg-white/60 space-y-2"
+                    class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2"
                   >
                     <component :is="getIconComponent(item.name)" class="w-10 h-10 text-black" />
                     <div>
@@ -112,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { GridLayout, GridItem } from 'vue3-grid-layout'
 import {
@@ -127,11 +124,12 @@ import {
 import iconLightRain from '@/assets/light-rain.png';
 import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
-import { useWeatherImage } from '@/composables/useWeatherImage';
+import { useWeatherImage } from '@/composables/useWeatherImage'
 
 const route = useRoute()
 const weatherData = ref(null)
 const forecastData = ref([])
+const { imageUrl } = useWeatherImage(weatherData)
 
 function fetchWeather() {
   const ville = route.query.ville || 'Paris'
@@ -257,17 +255,29 @@ const predefinedLayouts = {
 
 const layout = ref([]);
 const colNum = ref(3);
+const containerWidth = ref(window.innerWidth || 1200);
 
 function updateColNum() {
   const width = window.innerWidth;
   colNum.value = width < 640 ? 1 : 3;
 }
 
+function updateContainerWidth() {
+  containerWidth.value = window.innerWidth;
+}
+
 onMounted(() => {
   updateColNum();
+  updateContainerWidth();
   window.addEventListener('resize', updateColNum);
+  window.addEventListener('resize', updateContainerWidth);
   fetchWeather();
   fetchForecast();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateColNum);
+  window.removeEventListener('resize', updateContainerWidth);
 });
 
 watch(() => allBlocks.value.map((b) => b.active), () => {
