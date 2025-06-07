@@ -216,27 +216,27 @@ const hasReachedFavoriteLimit = computed(() => auth.isConnected && favoris.value
       <div v-if="isSidebarOpen" class="flex flex-col gap-4">
         <TransitionGroup name="fade" tag="div" class="contents">
           <CityCard
-  v-for="city in cities"
-  :key="city.id"
-  :name="city.name"
-  :removable="auth.isConnected"
-  @remove="removeFavorite(city.id)"
-  @click="goToCity(city.name)"
->
-  <template #default>
-    <div>
-      <span v-if="city.meteo && city.meteo.main && city.meteo.weather">
-        {{ Math.round(city.meteo.main.temp) }}°C
-        <img
-          :src="`https://openweathermap.org/img/wn/${city.meteo.weather[0].icon}@2x.png`"
-          :alt="city.meteo.weather[0].description"
-          class="w-8 h-8 inline-block align-middle ml-2"
-        />
-      </span>
-      <span v-else class="text-xs text-gray-400">Chargement...</span>
-    </div>
-  </template>
-</CityCard>
+            v-for="(city, index) in cities"
+            :key="city.id || `${city.name}-${index}`"
+            :name="city.name"
+            :removable="auth.isConnected"
+            @remove="removeFavorite(city.id)"
+            @click="goToCity(city.name)"
+          >
+            <template #default>
+              <div>
+                <span v-if="city.meteo && city.meteo.main && city.meteo.weather">
+                  {{ Math.round(city.meteo.main.temp) }}°C
+                  <img
+                    :src="`https://openweathermap.org/img/wn/${city.meteo.weather[0].icon}@2x.png`"
+                    :alt="city.meteo.weather[0].description"
+                    class="w-8 h-8 inline-block align-middle ml-2"
+                  />
+                </span>
+                <span v-else class="text-xs text-gray-400">Chargement...</span>
+              </div>
+            </template>
+          </CityCard>
           <a href="/connexion">
           <CityCard
             v-if="!auth.isConnected"

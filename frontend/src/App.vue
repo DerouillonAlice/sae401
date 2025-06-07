@@ -19,12 +19,12 @@ const { isSidebarOpen } = useSidebar()
       :class="isSidebarOpen ? 'w-64' : 'w-12'"
     />
 
-    <div class="flex flex-col flex-1 min-w-0 h-screen">
+    <div class="flex flex-col flex-1 h-screen">
       <Navbar />
       <main class="flex-1 overflow-y-auto p-6">
-        <router-view />
-      <Footer class="bottom-0 pt-4" />
+        <router-view class="h-full" />
       </main>
+      <Footer class="pb-6 pt-4 mx-8" />
     </div>
   </div>
 </template>

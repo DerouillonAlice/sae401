@@ -1,5 +1,5 @@
 <template>
-  <footer class="w-full">
+  <footer class="">
     <div class="px-6 py-2 border-t border-white/60 text-center text-sm text-gray-700">
       <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
         <span>&copy; {{ new Date().getFullYear() }} WeatherApp</span>

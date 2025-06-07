@@ -6,8 +6,8 @@ import CityHeading from '../components/CityHeading.vue'
 </script>
 
 <template>
-    <main class="grid h-screen grid-cols-1">
-        <section class="grid gap-4 mx-8 grid-rows-[auto_auto_auto_1fr]">
+    <main class="grid grid-cols-1">
+        <section class="grid gap-4 mx-8 ">
             <CityHeading />
 
             <WeekdaysTab />
