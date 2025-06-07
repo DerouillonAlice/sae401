@@ -24,10 +24,20 @@
   
   onMounted(async () => {
     try {
-      const response = await axios.get('/api/user/profile')
+      const response = await axios.get('/api/user/profile', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
       user.value = response.data
     } catch (e) {
-      error.value = "Impossible de charger le profil"
+      console.error('Erreur lors de la récupération du profil :', e)
+      if (e.response?.status === 401) {
+        localStorage.removeItem('token')
+        window.location.href = '/connexion'
+      } else {
+        error.value = "Impossible de charger le profil"
+      }
     } finally {
       loading.value = false
     }
