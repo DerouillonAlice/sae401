@@ -9,7 +9,7 @@
     </div>
 
     <div v-else>
-      <form @submit.prevent="updateProfile" class="space-y-4">
+      <form @submit.prevent="updateProfile" class="space-y-4 relative">
         <div>
           <label class="font-semibold">Nom</label>
           <input
@@ -61,19 +61,28 @@
           </select>
         </div>
 
-
-
-        <button
-          type="submit"
-          class="w-full bg-black text-white py-2 rounded-xl font-bold hover:bg-gray-800 transition"
-        >
-          Mettre à jour
-        </button>
+        <!-- Messages de succès/erreur -->
+        <div class="relative">
+          <button
+            type="submit"
+            class="w-full bg-black text-white py-2 rounded-xl font-bold hover:bg-gray-800 transition"
+          >
+            Mettre à jour
+          </button>
+          <div
+            v-if="success"
+            class="absolute inset-0 flex items-center justify-center bg-green-100 text-green-600 font-medium border border-green-300 rounded-xl p-2"
+          >
+            {{ success }}
+          </div>
+          <div
+            v-if="error"
+            class="absolute inset-0 flex items-center justify-center bg-red-100 text-red-600 font-medium border border-red-300 rounded-xl p-2"
+          >
+            {{ error }}
+          </div>
+        </div>
       </form>
-
-      <div v-if="success" class="text-green-600 mt-4 text-center font-medium">
-        {{ success }}
-      </div>
     </div>
   </div>
 </template>
@@ -118,9 +127,17 @@ const updateProfile = async () => {
       }
     })
     success.value = 'Profil mis à jour avec succès !'
+    // Efface le message de succès après 3 secondes
+    setTimeout(() => {
+      success.value = ''
+    }, 3000)
   } catch (e) {
     console.error('Erreur lors de la mise à jour du profil :', e)
     error.value = "Impossible de mettre à jour le profil"
+    // Efface le message d'erreur après 3 secondes
+    setTimeout(() => {
+      error.value = ''
+    }, 3000)
   }
 }
 </script>
