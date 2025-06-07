@@ -16,10 +16,17 @@ export const useAuthStore = defineStore('auth', {
         })
         this.isConnected = true
         this.user = res.data
-      } catch {
+      } catch (error) {
+        console.error('Erreur lors de la vérification de l\'authentification :', error)
         this.isConnected = false
         this.user = null
+        localStorage.removeItem('token') 
       }
+    },
+    logout() {
+      this.isConnected = false
+      this.user = null
+      localStorage.removeItem('token') 
     }
   }
 })

@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
@@ -94,6 +94,12 @@ const searchResults = ref([])
 const isSearching = ref(false) 
 const router = useRouter()
 const auth = useAuthStore()
+
+onMounted(() => {
+  if (localStorage.getItem('token')) {
+    auth.checkAuth()
+  }
+})
 
 const onSearchInput = async () => {
   if (searchQuery.value.length < 2) {
