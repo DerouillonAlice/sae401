@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -22,7 +24,7 @@ const submitLogin = async (e) => {
     localStorage.setItem('token', loginRes.data.token)
     success.value = 'Connexion réussie !'
     await auth.checkAuth()
-    window.location.href = '/'
+    router.push('/')
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur lors de la connexion'
   }
