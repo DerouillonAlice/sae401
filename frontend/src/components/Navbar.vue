@@ -103,7 +103,9 @@ const onSearchInput = async () => {
   isSearching.value = true
   try {
     const response = await axios.get(`/api/search/${encodeURIComponent(searchQuery.value)}`)
-    searchResults.value = response.data
+    searchResults.value = response.data.filter((result, index, self) =>
+      index === self.findIndex((r) => r.name === result.name)
+    )
   } catch (error) {
     console.error('Erreur lors de la recherche de ville :', error)
     searchResults.value = []
