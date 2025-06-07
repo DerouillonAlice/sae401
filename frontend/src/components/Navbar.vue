@@ -14,10 +14,10 @@
       <div class="relative flex-1">
         <input
           v-model="searchQuery"
-          @keyup.enter="rechercherVille"
+          @input="onSearchInput"
           type="text"
           placeholder="Rechercher une ville ..."
-          class="w-full rounded-full px-8 py-2 pr-12 bg-white/30 backdrop-blur-md shadow-lg border border-white/60 focus:border-indigo-100 focus:ring-1  focus:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+          class="w-full rounded-full px-8 py-2 pr-12 bg-white/30 backdrop-blur-md shadow-lg border border-white/60 focus:border-indigo-100 focus:ring-1 focus:bg-white/40 transition-all duration-300 ease-in-out outline-none"
         />
         <button
           @click="rechercherVille"
@@ -27,6 +27,21 @@
         >
           <MagnifyingGlassIcon class="w-5 h-5" />
         </button>
+
+        <ul
+          v-if="searchResults.length"
+          class="absolute left-0 right-0 mt-2 bg-white/90 backdrop-blur-md shadow-lg rounded-lg border border-gray-300 z-10 max-h-40 overflow-y-auto"
+        >
+          <li
+            v-for="(result, index) in searchResults"
+            :key="index"
+            @click="selectResult(result)"
+            class="px-4 py-2 hover:bg-gray-200 cursor-pointer flex justify-between items-center"
+          >
+            <span>{{ result.name }}</span>
+            <span v-if="result.country" class="text-sm text-gray-500">({{ result.country }})</span>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -66,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
@@ -75,21 +90,43 @@ import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon } from '@heroicons/vue/24/solid'
 
 const searchQuery = ref('')
+const searchResults = ref([]) 
+const isSearching = ref(false) 
 const router = useRouter()
 const auth = useAuthStore()
 
-onMounted(() => {
-  auth.checkAuth()
-})
+const onSearchInput = async () => {
+  if (searchQuery.value.length < 2) {
+    searchResults.value = []
+    return
+  }
+  isSearching.value = true
+  try {
+    const response = await axios.get(`/api/search/${encodeURIComponent(searchQuery.value)}`)
+    searchResults.value = response.data
+  } catch (error) {
+    console.error('Erreur lors de la recherche de ville :', error)
+    searchResults.value = []
+  } finally {
+    isSearching.value = false
+  }
+}
 
 const rechercherVille = async () => {
   if (!searchQuery.value.trim()) return
-  try {
-    const response = await axios.get(`api/search/${searchQuery.value}`)
-    console.log('Résultats de recherche :', response.data)
-  } catch (error) {
-    console.error('Erreur lors de la recherche de ville :', error)
-  }
+  await onSearchInput()
+}
+
+const selectResult = (result) => {
+  router.push({
+    name: 'HomeView',
+    query: {
+      ville: result.name,
+      t: Date.now() 
+    }
+  })
+  searchResults.value = [] 
+  searchQuery.value = ''
 }
 
 const goToProfile = () => {
