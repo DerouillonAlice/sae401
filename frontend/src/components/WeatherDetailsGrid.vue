@@ -199,17 +199,31 @@ function fetchForecast() {
       if (Array.isArray(data.list)) {
         cityData.value = data.city
         
-        fetchTodayForecast(data.list)
+        const today = new Date()
+        const todayString = today.toDateString()
+        
+        const todayData = []
+        const otherDaysData = []
+        
+        data.list.forEach(item => {
+          const itemDate = new Date(item.dt * 1000)
+          if (itemDate.toDateString() === todayString) {
+            todayData.push(item)
+          } else {
+            otherDaysData.push(item)
+          }
+        })
+        
+        fetchTodayForecast(todayData)
         
         const dailyForecasts = []
         const processedDates = new Set()
         
-        data.list.forEach(item => {
+        otherDaysData.forEach(item => {
           const date = new Date(item.dt * 1000)
           const dateKey = date.toDateString()
           
-          if (!processedDates.has(dateKey) && 
-              (item.dt_txt.includes(' 12:00:00') || !processedDates.has(dateKey))) {
+          if (!processedDates.has(dateKey)) {
             processedDates.add(dateKey)
             dailyForecasts.push({
               ...item,
@@ -219,7 +233,7 @@ function fetchForecast() {
           }
         })
         
-        forecastData.value = dailyForecasts.slice(0, 7) 
+        forecastData.value = dailyForecasts.slice(0, 7)
       }
     })
 }

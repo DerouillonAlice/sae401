@@ -16,7 +16,7 @@ const dynamicDays = computed(() => {
   const today = new Date()
   const result = ['Aujourd\'hui']
   
-  for (let i = 1; i < 7; i++) {
+  for (let i = 1; i < 6; i++) {
     const date = new Date(today)
     date.setDate(today.getDate() + i)
     const dayName = date.toLocaleDateString('fr-FR', { weekday: 'short' })
