@@ -25,7 +25,6 @@ const grandesVilles = [
 
 const meteoVilles = ref({})
 const meteoFavoris = ref({})
-const favoris = ref([])
 
 function getWeatherIcon(weather) {
   if (!weather) return sunImg
@@ -39,7 +38,6 @@ function getWeatherIcon(weather) {
 const fetchMeteo = async (ville) => {
   try { 
     const res = await axios.get(`/api/weather/${encodeURIComponent(ville)}`)
-    console.log('Météo reçue pour', ville, res.data)
     meteoVilles.value = { ...meteoVilles.value, [ville]: res.data }
   } catch {
     meteoVilles.value = { ...meteoVilles.value, [ville]: { error: 'Erreur météo' } }
@@ -55,25 +53,23 @@ const fetchMeteoFavori = async (ville) => {
   }
 }
 
-const fetchFavoris = async () => {
-  try {
-    const token = localStorage.getItem('token')
-    if (!token) return
-    const res = await axios.get('/api/favorites', {
-      headers: { Authorization: `Bearer ${token}` }
+watch(
+  () => auth.favorites,
+  (newFavorites) => {
+    newFavorites.forEach(fav => {
+      if (!meteoFavoris.value[fav.city]) {
+        fetchMeteoFavori(fav.city)
+      }
     })
-    favoris.value = res.data
-    favoris.value.forEach(fav => fetchMeteoFavori(fav.city))
-  } catch {
-    favoris.value = []
-  }
-}
+  },
+  { immediate: true, deep: true }
+)
 
 watch(
   () => auth.isConnected,
   (connected) => {
     if (connected) {
-      fetchFavoris()
+      auth.fetchFavorites()
     } else {
       grandesVilles.forEach(ville => {
         if (!meteoVilles.value[ville.name]) {
@@ -87,7 +83,7 @@ watch(
 
 const cities = computed(() => {
   return auth.isConnected
-    ? favoris.value.map(fav => ({
+    ? auth.favorites.map(fav => ({ 
         id: fav.id,
         name: fav.city,
         meteo: meteoFavoris.value[fav.city],
@@ -124,7 +120,7 @@ function openAddFavoriteModal() {
 async function submitAddFavorite() {
   addFavoriteError.value = ''
   addFavoriteSuccess.value = ''
-  if (favoris.value.length >= MAX_FAVORITES) {
+  if (auth.favorites.length >= MAX_FAVORITES) { 
     addFavoriteError.value = "Vous ne pouvez pas avoir plus de 7 favoris."
     return
   }
@@ -132,8 +128,7 @@ async function submitAddFavorite() {
     addFavoriteError.value = "Veuillez sélectionner une ville dans la liste."
     return
   }
-  // Vérifie si la ville est déjà dans les favoris
-  const alreadyExists = favoris.value.some(
+  const alreadyExists = auth.favorites.some( 
     fav => fav.city.toLowerCase() === selectedCity.value.name.toLowerCase()
   )
   if (alreadyExists) {
@@ -141,18 +136,9 @@ async function submitAddFavorite() {
     return
   }
   try {
-    const token = localStorage.getItem('token')
-    await axios.post('/api/favorites',
-      {
-        city: selectedCity.value.name,
-        latitude: selectedCity.value.latitude ?? 0,
-        longitude: selectedCity.value.longitude ?? 0
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+    await auth.addFavorite(selectedCity.value.name) 
     addFavoriteSuccess.value = 'Favori ajouté !'
     showAddFavorite.value = false
-    fetchFavoris()
   } catch (err) {
     addFavoriteError.value = err.response?.data?.error || 'Erreur lors de l\'ajout'
   }
@@ -181,31 +167,27 @@ const selectCity = (city) => {
 
 const removeFavorite = async (favoriteId) => {
   try {
-    const token = localStorage.getItem('token')
-    const url = `/api/favorites/${favoriteId}`
-    await axios.delete(url, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    favoris.value = favoris.value.filter(fav => fav.id !== favoriteId)
+    const favoriteToRemove = auth.favorites.find(fav => fav.id === favoriteId)
+    if (favoriteToRemove) {
+      await auth.removeFavorite(favoriteToRemove.city) 
+    }
   } catch (err) {
     console.error('Erreur lors de la suppression du favori:', err)
-    console.error('Réponse:', err.response?.data)
   }
 }
 
 function goToCity(cityName) {
-  // Ajoute un paramètre bidon pour forcer le refresh même si la ville ne change pas
   router.push({ 
     name: 'HomeView', 
     query: { 
       ville: cityName, 
-      t: Date.now() // paramètre unique à chaque clic
+      t: Date.now()
     } 
   })
 }
 
 const MAX_FAVORITES = 7
-const hasReachedFavoriteLimit = computed(() => auth.isConnected && favoris.value.length >= MAX_FAVORITES)
+const hasReachedFavoriteLimit = computed(() => auth.isConnected && auth.favorites.length >= MAX_FAVORITES) 
 </script>
 
 <template>
