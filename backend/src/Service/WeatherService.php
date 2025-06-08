@@ -29,9 +29,40 @@ class WeatherService
     // 3. Prévisions 5 jours (toutes les 3h)
     public function fetchForecast(string $city): array
     {
-        return $this->makeRequest('/data/2.5/forecast', ['q' => $city]);
+        $forecast = $this->makeRequest('/data/2.5/forecast', ['q' => $city]);
+        
+        if (isset($forecast['list'])) {
+            $dailyData = [];
+            $processedDates = [];
+            
+            foreach ($forecast['list'] as $item) {
+                $date = new \DateTime('@' . $item['dt']);
+                $dateKey = $date->format('Y-m-d');
+                $hour = (int) $date->format('H');
+                
+                if (!isset($processedDates[$dateKey])) {
+                    $processedDates[$dateKey] = $item;
+                    $processedDates[$dateKey]['selected_hour'] = $hour;
+                } else {
+                    $currentHourDiff = abs($processedDates[$dateKey]['selected_hour'] - 13);
+                    $newHourDiff = abs($hour - 13);
+                    
+                    if ($newHourDiff < $currentHourDiff && $hour >= 9 && $hour <= 18) {
+                        $processedDates[$dateKey] = $item;
+                        $processedDates[$dateKey]['selected_hour'] = $hour;
+                    }
+                }
+            }
+        
+            $forecast['list'] = array_values($processedDates);
+            
+            foreach ($forecast['list'] as &$item) {
+                unset($item['selected_hour']);
+            }
+        }
+        
+        return $forecast;
     }
-
     // 4. Prévisions journalières
     public function fetchDailyForecast(float $lat, float $lon): array
     {
