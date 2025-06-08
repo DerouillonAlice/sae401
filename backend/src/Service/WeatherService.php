@@ -32,33 +32,46 @@ class WeatherService
         $forecast = $this->makeRequest('/data/2.5/forecast', ['q' => $city]);
         
         if (isset($forecast['list'])) {
+            $today = new \DateTime();
+            $todayKey = $today->format('Y-m-d');
+            
+            $processedData = [];
             $dailyData = [];
-            $processedDates = [];
             
             foreach ($forecast['list'] as $item) {
                 $date = new \DateTime('@' . $item['dt']);
                 $dateKey = $date->format('Y-m-d');
                 $hour = (int) $date->format('H');
                 
-                if (!isset($processedDates[$dateKey])) {
-                    $processedDates[$dateKey] = $item;
-                    $processedDates[$dateKey]['selected_hour'] = $hour;
+                if ($dateKey === $todayKey) {
+                    $processedData[] = $item;
                 } else {
-                    $currentHourDiff = abs($processedDates[$dateKey]['selected_hour'] - 13);
-                    $newHourDiff = abs($hour - 13);
-                    
-                    if ($newHourDiff < $currentHourDiff && $hour >= 9 && $hour <= 18) {
-                        $processedDates[$dateKey] = $item;
-                        $processedDates[$dateKey]['selected_hour'] = $hour;
+                    if (!isset($dailyData[$dateKey])) {
+                        $dailyData[$dateKey] = $item;
+                        $dailyData[$dateKey]['selected_hour'] = $hour;
+                    } else {
+                        $currentHourDiff = abs($dailyData[$dateKey]['selected_hour'] - 13);
+                        $newHourDiff = abs($hour - 13);
+                        
+                        if ($newHourDiff < $currentHourDiff && $hour >= 9 && $hour <= 18) {
+                            $dailyData[$dateKey] = $item;
+                            $dailyData[$dateKey]['selected_hour'] = $hour;
+                        }
                     }
                 }
             }
-        
-            $forecast['list'] = array_values($processedDates);
             
-            foreach ($forecast['list'] as &$item) {
-                unset($item['selected_hour']);
+            foreach ($dailyData as $dayData) {
+                unset($dayData['selected_hour']);
+                $processedData[] = $dayData;
             }
+            
+            // Trier par timestamp
+            usort($processedData, function($a, $b) {
+                return $a['dt'] - $b['dt'];
+            });
+            
+            $forecast['list'] = $processedData;
         }
         
         return $forecast;
