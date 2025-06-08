@@ -29,9 +29,53 @@ class WeatherService
     // 3. Prévisions 5 jours (toutes les 3h)
     public function fetchForecast(string $city): array
     {
-        return $this->makeRequest('/data/2.5/forecast', ['q' => $city]);
+        $forecast = $this->makeRequest('/data/2.5/forecast', ['q' => $city]);
+        
+        if (isset($forecast['list'])) {
+            $today = new \DateTime();
+            $todayKey = $today->format('Y-m-d');
+            
+            $processedData = [];
+            $dailyData = [];
+            
+            foreach ($forecast['list'] as $item) {
+                $date = new \DateTime('@' . $item['dt']);
+                $dateKey = $date->format('Y-m-d');
+                $hour = (int) $date->format('H');
+                
+                if ($dateKey === $todayKey) {
+                    $processedData[] = $item;
+                } else {
+                    if (!isset($dailyData[$dateKey])) {
+                        $dailyData[$dateKey] = $item;
+                        $dailyData[$dateKey]['selected_hour'] = $hour;
+                    } else {
+                        $currentHourDiff = abs($dailyData[$dateKey]['selected_hour'] - 13);
+                        $newHourDiff = abs($hour - 13);
+                        
+                        if ($newHourDiff < $currentHourDiff && $hour >= 9 && $hour <= 18) {
+                            $dailyData[$dateKey] = $item;
+                            $dailyData[$dateKey]['selected_hour'] = $hour;
+                        }
+                    }
+                }
+            }
+            
+            foreach ($dailyData as $dayData) {
+                unset($dayData['selected_hour']);
+                $processedData[] = $dayData;
+            }
+            
+            // Trier par timestamp
+            usort($processedData, function($a, $b) {
+                return $a['dt'] - $b['dt'];
+            });
+            
+            $forecast['list'] = $processedData;
+        }
+        
+        return $forecast;
     }
-
     // 4. Prévisions journalières
     public function fetchDailyForecast(float $lat, float $lon): array
     {

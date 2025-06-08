@@ -1,25 +1,37 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+const days = ['Aujourd\'hui', 'Demain', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 const selected = ref(0)
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', index: number): void
-}>()
+const emit = defineEmits(['update:modelValue'])
 
 const selectDay = (index: number) => {
   selected.value = index
   emit('update:modelValue', index)
 }
+
+const dynamicDays = computed(() => {
+  const today = new Date()
+  const result = ['Aujourd\'hui']
+  
+  for (let i = 1; i < 6; i++) {
+    const date = new Date(today)
+    date.setDate(today.getDate() + i)
+    const dayName = date.toLocaleDateString('fr-FR', { weekday: 'short' })
+    result.push(dayName.charAt(0).toUpperCase() + dayName.slice(1))
+  }
+  
+  return result
+})
 </script>
 
 <template>
   <section class="flex w-full h-fit bg-white/40 backdrop-blur-md rounded-md shadow overflow-hidden border border-white/70">
     <button
-      v-for="(day, index) in days"
-      :key="day"
+      v-for="(day, index) in dynamicDays"
+      :key="index"
       @click="selectDay(index)"
       class="flex-1 py-2 h-16 text-sm font-medium text-center transition-colors duration-200"
       :class="{
