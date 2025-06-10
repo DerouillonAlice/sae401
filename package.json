@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "lucide-vue-next": "^0.513.0",
+    "pinia": "^3.0.3",
+    "vue-grid": "^0.1.1",
+    "vue-router": "^4.5.1",
+    "vue3-grid-layout": "^1.0.0"
+  }
+}
