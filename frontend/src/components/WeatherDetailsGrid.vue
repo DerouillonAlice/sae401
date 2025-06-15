@@ -295,15 +295,20 @@ function updateLayout(newLayout) {
 }
 </script>
 
-<style scoped>
-.vue-grid-item.vue-grid-placeholder {
-  opacity: 0 !important;
+<style>
+.vue-grid-placeholder {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
 }
 .vue-grid-item {
-  transition: all 0.3s ease;
+  user-select: none; /*empeche la sélection du texte pour enlever le fond bleu*/
 }
+
 .vue-grid-layout {
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
 </style>
+
