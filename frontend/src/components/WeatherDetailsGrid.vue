@@ -127,6 +127,7 @@ import iconLightRain from '@/assets/light-rain.png';
 import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
 import { useWeatherImage } from '@/composables/useWeatherImage'
+import { getWeatherByCity, getForecastByCity } from '../services/services'
 
 const props = defineProps({
   selectedDayIndex: {
@@ -186,16 +187,15 @@ const { imageUrl } = useWeatherImage(currentDayData)
 
 function fetchWeather() {
   const ville = route.query.ville || 'Paris'
-  fetch(`/api/weather/${encodeURIComponent(ville)}`)
-    .then(res => res.json())
-    .then(data => { weatherData.value = data })
+  getWeatherByCity(ville)
+    .then(res => { weatherData.value = res.data })
 }
 
 function fetchForecast() {
   const ville = route.query.ville || 'Paris'
-  fetch(`/api/forecast/${encodeURIComponent(ville)}`)
-    .then(res => res.json())
-    .then(data => {
+  getForecastByCity(ville)
+    .then(res => {
+      const data = res.data
       if (Array.isArray(data.list)) {
         cityData.value = data.city
         
@@ -239,12 +239,22 @@ function fetchForecast() {
 }
 
 function fetchTodayForecast(forecastList) {
-  const getHourEntry = (hour) =>
-    forecastList.find(item => item.dt_txt && item.dt_txt.includes(` ${hour}:00:00`))
+  const findClosest = (targetHour, startHour, endHour) => {
+    const candidates = forecastList.filter(item => {
+      const hour = new Date(item.dt * 1000).getHours()
+      return hour >= startHour && hour < endHour
+    })
+    if (!candidates.length) return null
+    return candidates.reduce((prev, curr) => {
+      const prevHour = new Date(prev.dt * 1000).getHours()
+      const currHour = new Date(curr.dt * 1000).getHours()
+      return Math.abs(currHour - targetHour) < Math.abs(prevHour - targetHour) ? curr : prev
+    })
+  }
 
-  const matin = getHourEntry('10')
-  const apresmidi = getHourEntry('14')
-  const soir = getHourEntry('21')
+  const matin = findClosest(9, 6, 12)      // 6h-12h, cible 9h
+  const apresmidi = findClosest(15, 12, 18) // 12h-18h, cible 15h
+  const soir = findClosest(20, 18, 23)     // 18h-23h, cible 20h
 
   todayHourlyData.value = [
     matin && {

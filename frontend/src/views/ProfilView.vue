@@ -1,6 +1,5 @@
 <template>
   <div class="w-full justify-center mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Section Profil -->
     <div class="p-6 rounded-2xl max-w-4xl bg-white/60 backdrop-blur-md border shadow text-black">
       <h2 class="text-3xl font-bold mb-6 text-center">Mon profil</h2>
 
@@ -75,7 +74,6 @@
       </div>
     </div>
 
-    <!-- Section Modification du mot de passe -->
     <div class="p-6 rounded-2xl max-w-4xl bg-white/60 backdrop-blur-md border shadow text-black">
       <h2 class="text-3xl font-bold mb-6 text-center">Modifier le mot de passe</h2>
 
@@ -113,7 +111,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { getProfile, updateProfile as apiUpdateProfile, changePassword as apiChangePassword } from '../services/services'
 
 const user = ref({})
 const loading = ref(true)
@@ -126,11 +124,7 @@ const passwordSuccess = ref('')
 
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/user/profile', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    const response = await getProfile()
     user.value = response.data
   } catch (e) {
     console.error('Erreur lors de la récupération du profil :', e)
@@ -149,11 +143,7 @@ const updateProfile = async () => {
   success.value = ''
   error.value = ''
   try {
-    await axios.put('/api/user/profile', user.value, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    await apiUpdateProfile(user.value)
     success.value = 'Profil mis à jour avec succès !'
     setTimeout(() => {
       success.value = ''
@@ -171,14 +161,7 @@ const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = ''
   try {
-    await axios.post('/api/user/change-password', {
-      oldPassword: oldPassword.value,
-      newPassword: newPassword.value
-    }, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    await apiChangePassword(oldPassword.value, newPassword.value)
     passwordSuccess.value = 'Mot de passe modifié avec succès !'
     oldPassword.value = ''
     newPassword.value = ''
