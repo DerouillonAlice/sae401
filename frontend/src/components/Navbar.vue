@@ -63,18 +63,14 @@
         </svg>
       </button>
       <template v-if="!auth.isConnected">
-        <button
-          @click="goToLogin"
-          class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
-        >
-          Connexion
-        </button>
-        <button
-          @click="goToRegister"
-          class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
-        >
-          Inscription
-        </button>
+        <button @click="goToLogin"
+                      class="px-6 py-2 rounded-full bg-white/60 backdrop-blur-md  border-white/70 hover:bg-white/70 transition-all duration-300 font-semibold">
+                      Connexion
+                    </button>
+                    <button @click="goToRegister"
+                      class="px-6 py-2 rounded-full bg-black text-white shadow hover:bg-black/90 transition-all duration-300 font-semibold">
+                      Inscription
+                    </button>
       </template>
     </div>
   </div>

@@ -3,46 +3,29 @@
     <div class="flex flex-1 overflow-hidden">
       <main class="flex-1 overflow-auto sm:overflow-clip">
         <div class="w-full flex flex-col gap-4 mx-auto">
-          <!-- Filtres -->
-          <div
-            v-if="auth.isConnected"
-            class="w-full flex flex-wrap justify-evenly gap-y-4 py-4 px-2 rounded-xl"
-          >
-            <label
-              v-for="block in allBlocks"
-              :key="block.i"
-              class="flex items-center gap-2 text-sm font-medium cursor-pointer text-black"
-            >
-              <input
-                type="checkbox"
-                v-model="block.active"
-                class="peer hidden"
-              />
+          <div v-if="auth.isConnected" class="w-full flex flex-wrap justify-evenly gap-y-4 py-4 px-2 rounded-xl">
+            <label v-for="block in allBlocks" :key="block.i"
+              class="flex items-center gap-2 text-sm font-medium cursor-pointer text-black">
+              <input type="checkbox" v-model="block.active" class="peer hidden" />
               <span
-                class="w-4 h-4 rounded-full border-2 border-gray-300 peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"
-              ></span>
+                class="w-4 h-4 rounded-full border-2 border-gray-300 peer-checked:bg-black peer-checked:border-white transition-all duration-200 shadow-sm"></span>
               <span class="whitespace-nowrap">{{ block.name }}</span>
             </label>
           </div>
 
-          <!-- Température + Grid -->
           <div class="flex flex-col lg:flex-row gap-4 items-stretch">
-            <!-- Bloc Température -->
             <div
-              class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden"
-            >
-              <img
-                :src="imageUrl"
-                alt="Météo"
-                class="absolute -top-28 -right-60 max-h-[580px] max-w-[580px] object-contain pointer-events-none z-0 opacity-90"
-              />
+              class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden">
+              <img :src="imageUrl" alt="Météo"
+                class="absolute -top-28 -right-60 max-h-[580px] max-w-[580px] object-contain pointer-events-none z-0 opacity-90" />
 
               <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
                   {{ currentDayData?.main?.temp ? Math.round(currentDayData.main.temp) + '°C' : '—' }}
                 </p>
                 <p class="text-xl font-bold mt-2">
-                  Ressenti : {{ currentDayData?.main?.feels_like ? Math.round(currentDayData.main.feels_like) + '°C' : '—' }}
+                  Ressenti : {{ currentDayData?.main?.feels_like ? Math.round(currentDayData.main.feels_like) + '°C' :
+                    '—' }}
                 </p>
                 <p class="text-lg mt-2 capitalize">
                   {{ currentDayData?.weather?.[0]?.description || '—' }}
@@ -54,50 +37,23 @@
               </div>
 
               <div class="flex w-full mt-6 z-10 relative">
-                <div
-                  v-for="(entry, index) in dayForecastData"
-                  :key="index"
-                  class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2"
-                >
+                <div v-for="(entry, index) in dayForecastData" :key="index"
+                  class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2">
                   <div class="text-sm font-bold">{{ entry.label }}</div>
-                  <img
-                    :src="getForecastIcon(entry.icon)"
-                    alt="Icon météo"
-                    class="w-10 h-10 mx-auto object-contain"
-                  />
+                  <img :src="getForecastIcon(entry.icon)" alt="Icon météo" class="w-10 h-10 mx-auto object-contain" />
                   <div class="text-base font-semibold">{{ Math.round(entry.temp) }}°C</div>
                 </div>
               </div>
             </div>
 
-            <!-- Grid météo -->
-            <div class="flex-1">
-              <GridLayout
-                ref="gridLayoutRef"
-                :layout="layout"
-                :col-num="colNum"
-                :row-height="auto"
-                :is-draggable="true"
-                :is-resizable="false"
-                :auto-size="true"
-                :use-css-transforms="false"
-                :vertical-compact="false"
-                :width="containerWidth"
-                class="h-full gap-4 mt-0"
-                @layout-updated="updateLayout"
-              >
-                <GridItem
-                  v-for="item in layout"
-                  :key="item.i"
-                  :i="item.i"
-                  :x="item.x"
-                  :y="item.y"
-                  :w="item.w"
-                  :h="item.h"
-                >
+            <div v-if="auth.isConnected" class="flex-1">
+              <GridLayout ref="gridLayoutRef" :layout="layout" :col-num="colNum" :row-height="auto" :is-draggable="true"
+                :is-resizable="false" :auto-size="true" :use-css-transforms="false" :vertical-compact="false"
+                :width="containerWidth" class="h-full gap-4 mt-0" @layout-updated="updateLayout">
+                <GridItem v-for="item in layout" :key="item.i" :i="item.i" :x="item.x" :y="item.y" :w="item.w"
+                  :h="item.h">
                   <div
-                    class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2"
-                  >
+                    class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2">
                     <component :is="getIconComponent(item.name)" class="w-10 h-10 text-black" />
                     <div>
                       {{ getBlockContent(item.name) }}
@@ -105,6 +61,36 @@
                   </div>
                 </GridItem>
               </GridLayout>
+            </div>
+
+            <div v-else class="flex-1 flex flex-col gap-4">
+              <div class="flex flex-col lg:flex-row gap-4 items-stretch h-full min-h-[220px]">
+                <div
+                  v-for="block in allBlocks.slice(0, 3)"
+                  :key="block.i"
+                  class="flex-1 flex flex-col items-center justify-center rounded-2xl border shadow text-lg font-semibold space-y-2 bg-white/60 backdrop-blur-md p-6 text-black text-center h-full"
+                >
+                  <component :is="getIconComponent(block.name)" class="w-10 h-10 text-black mb-2" />
+                  <div >{{ getBlockContent(block.name) }}</div>
+                </div>
+              </div>
+              <div class="flex flex-col lg:flex-row gap-4 items-stretch">
+                <div
+                  class="flex-1 flex flex-col items-center justify-center rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 text-black text-center h-full"
+                >
+                  <div class="text-xl font-bold mb-2">Connectez-vous pour accéder à toutes les fonctionnalités</div>
+                  <div class="flex gap-4 mt-4">
+                    <button @click="goToLogin"
+                      class="px-6 py-2 rounded-full bg-white/30 backdrop-blur-md border-white/70 hover:bg-white/40 transition-all duration-300 font-semibold">
+                      Connexion
+                    </button>
+                    <button @click="goToRegister"
+                      class="px-6 py-2 rounded-full bg-black text-white shadow hover:bg-black/90 transition-all duration-300 font-semibold">
+                      Inscription
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -115,6 +101,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { GridLayout, GridItem } from 'vue3-grid-layout'
 
@@ -125,13 +112,13 @@ import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
 import { useWeatherImage } from '@/composables/useWeatherImage'
 import { getWeatherByCity, getForecastByCity } from '../services/services'
-import { 
-  WindIcon, 
-  BarChart3Icon, 
-  DropletIcon, 
-  EyeIcon, 
-  CloudIcon, 
-  SunIcon 
+import {
+  WindIcon,
+  BarChart3Icon,
+  DropletIcon,
+  EyeIcon,
+  CloudIcon,
+  SunIcon
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 
@@ -143,13 +130,23 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const weatherData = ref(null) 
-const forecastData = ref([]) 
-const todayHourlyData = ref([]) 
-const cityData = ref(null) 
+const weatherData = ref(null)
+const forecastData = ref([])
+const todayHourlyData = ref([])
+const cityData = ref(null)
 const selectedDayIndex = ref(props.selectedDayIndex)
+const router = useRouter()
 
 const auth = useAuthStore()
+
+const goToRegister = () => {
+  router.push({ path: '/inscription' })
+}
+
+const goToLogin = () => {
+  router.push({ path: '/connexion' })
+}
+
 
 onMounted(() => {
   if (localStorage.getItem('token')) {
@@ -163,9 +160,9 @@ watch(() => props.selectedDayIndex, (newIndex) => {
 
 const currentDayData = computed(() => {
   if (selectedDayIndex.value === 0) {
-    return weatherData.value 
+    return weatherData.value
   } else {
-    return forecastData.value[selectedDayIndex.value - 1] || null 
+    return forecastData.value[selectedDayIndex.value - 1] || null
   }
 })
 
@@ -175,7 +172,7 @@ const dayForecastData = computed(() => {
   } else {
     const dayData = forecastData.value[selectedDayIndex.value - 1]
     if (!dayData) return []
-    
+
     const baseTemp = dayData.main?.temp || 20
     return [
       {
@@ -212,13 +209,13 @@ function fetchForecast() {
       const data = res.data
       if (Array.isArray(data.list)) {
         cityData.value = data.city
-        
+
         const today = new Date()
         const todayString = today.toDateString()
-        
+
         const todayData = []
         const otherDaysData = []
-        
+
         data.list.forEach(item => {
           const itemDate = new Date(item.dt * 1000)
           if (itemDate.toDateString() === todayString) {
@@ -227,16 +224,16 @@ function fetchForecast() {
             otherDaysData.push(item)
           }
         })
-        
+
         fetchTodayForecast(todayData)
-        
+
         const dailyForecasts = []
         const processedDates = new Set()
-        
+
         otherDaysData.forEach(item => {
           const date = new Date(item.dt * 1000)
           const dateKey = date.toDateString()
-          
+
           if (!processedDates.has(dateKey)) {
             processedDates.add(dateKey)
             dailyForecasts.push({
@@ -246,7 +243,7 @@ function fetchForecast() {
             })
           }
         })
-        
+
         forecastData.value = dailyForecasts.slice(0, 7)
       }
     })
@@ -321,10 +318,6 @@ function getBlockContent(name) {
 
   switch (name) {
     case 'Vent': return `${data.wind?.speed || 0} m/s`;
-    case 'Pression': return `${data.main?.pressure || 0} hPa`;
-    case 'Humidité': return `${data.main?.humidity || 0} %`;
-    case 'Visibilité': return `${Math.round((data.visibility || 0) / 1000)} km`;
-    case 'Nuages': return `${data.clouds?.all || 0} %`;
     case 'Cycle Soleil': {
       const tz = cityData.value?.timezone ?? 0
       const lat = cityData.value?.coord?.lat
@@ -345,6 +338,11 @@ function getBlockContent(name) {
       }
       return '—'
     }
+    case 'Pression': return `${data.main?.pressure || 0} hPa`;
+    case 'Humidité': return `${data.main?.humidity || 0} %`;
+    case 'Visibilité': return `${Math.round((data.visibility || 0) / 1000)} km`;
+    case 'Nuages': return `${data.clouds?.all || 0} %`;
+
     default: return name;
   }
 }
@@ -357,10 +355,10 @@ function getDateInfo() {
   } else {
     const dayData = forecastData.value[selectedDayIndex.value - 1]
     if (!dayData) return '—'
-    return dayData.date.toLocaleDateString('fr-FR', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
+    return dayData.date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
     })
   }
 }
@@ -368,11 +366,11 @@ function getDateInfo() {
 function getIconComponent(name) {
   switch (name) {
     case 'Vent': return WindIcon;
+    case 'Cycle Soleil': return SunIcon;
     case 'Pression': return BarChart3Icon;
     case 'Humidité': return DropletIcon;
     case 'Visibilité': return EyeIcon;
     case 'Nuages': return CloudIcon;
-    case 'Cycle Soleil': return SunIcon;
     default: return SunIcon;
   }
 }
@@ -386,11 +384,11 @@ function getForecastIcon(code) {
 
 const allBlocks = ref([
   { i: '1', name: 'Vent', active: true },
-  { i: '2', name: 'Pression', active: true },
+  { i: '2', name: 'Cycle Soleil', active: true },
   { i: '3', name: 'Humidité', active: true },
   { i: '4', name: 'Visibilité', active: true },
   { i: '5', name: 'Nuages', active: true },
-  { i: '6', name: 'Cycle Soleil', active: true }
+  { i: '6', name: 'Pression', active: true }
 ]);
 
 const predefinedLayouts = {
@@ -487,9 +485,11 @@ function updateLayout(newLayout) {
 .vue-grid-item.vue-grid-placeholder {
   opacity: 0 !important;
 }
+
 .vue-grid-item {
   transition: all 0.3s ease;
 }
+
 .vue-grid-layout {
   padding-top: 0 !important;
   margin-top: 0 !important;
