@@ -4,7 +4,10 @@
       <main class="flex-1 overflow-auto sm:overflow-clip">
         <div class="w-full flex flex-col gap-4 mx-auto">
           <!-- Filtres -->
-          <div class="w-full flex flex-wrap justify-evenly gap-y-4 py-4 px-2 rounded-xl">
+          <div
+            v-if="auth.isConnected"
+            class="w-full flex flex-wrap justify-evenly gap-y-4 py-4 px-2 rounded-xl"
+          >
             <label
               v-for="block in allBlocks"
               :key="block.i"
@@ -130,6 +133,7 @@ import {
   CloudIcon, 
   SunIcon 
 } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   selectedDayIndex: {
@@ -144,6 +148,14 @@ const forecastData = ref([])
 const todayHourlyData = ref([]) 
 const cityData = ref(null) 
 const selectedDayIndex = ref(props.selectedDayIndex)
+
+const auth = useAuthStore()
+
+onMounted(() => {
+  if (localStorage.getItem('token')) {
+    auth.checkAuth()
+  }
+})
 
 watch(() => props.selectedDayIndex, (newIndex) => {
   selectedDayIndex.value = newIndex
