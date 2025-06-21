@@ -84,10 +84,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import axios from 'axios'
 import { UserIcon } from '@heroicons/vue/24/solid'
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon } from '@heroicons/vue/24/solid'
+import { searchCities } from '../services/services' 
 
 const searchQuery = ref('')
 const searchResults = ref([]) 
@@ -108,7 +108,7 @@ const onSearchInput = async () => {
   }
   isSearching.value = true
   try {
-    const response = await axios.get(`/api/search/${encodeURIComponent(searchQuery.value)}`)
+    const response = await searchCities(searchQuery.value) 
     searchResults.value = response.data.filter((result, index, self) =>
       index === self.findIndex((r) => r.name === result.name)
     )

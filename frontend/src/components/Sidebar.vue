@@ -4,13 +4,16 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useSidebar } from '@/composables/useSidebar'
 import { useAuthStore } from '@/stores/auth'
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
-import sunImg from '../assets/sun.png'
-import rainImg from '../assets/rain.png'
 import fond from '../assets/fond.png'
-import lightRainImg from '../assets/light-rain.png'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
-
+import {
+  getWeatherByCity,
+  searchCities,
+  addFavorite as apiAddFavorite,
+  removeFavorite as apiRemoveFavorite,
+  fetchFavorites as apiFetchFavorites
+} from '../services/services'
+import { useWeatherImage } from '@/composables/useWeatherImage' 
 const { isSidebarOpen } = useSidebar()
 const auth = useAuthStore()
 const router = useRouter()
@@ -26,18 +29,9 @@ const grandesVilles = [
 const meteoVilles = ref({})
 const meteoFavoris = ref({})
 
-function getWeatherIcon(weather) {
-  if (!weather) return sunImg
-  const main = weather.weather?.[0]?.main?.toLowerCase() || ''
-  if (main.includes('rain')) return rainImg
-  if (main.includes('cloud')) return lightRainImg
-  if (main.includes('clear')) return sunImg
-  return sunImg
-}
-
 const fetchMeteo = async (ville) => {
   try { 
-    const res = await axios.get(`/api/weather/${encodeURIComponent(ville)}`)
+    const res = await getWeatherByCity(ville)
     meteoVilles.value = { ...meteoVilles.value, [ville]: res.data }
   } catch {
     meteoVilles.value = { ...meteoVilles.value, [ville]: { error: 'Erreur météo' } }
@@ -46,7 +40,7 @@ const fetchMeteo = async (ville) => {
 
 const fetchMeteoFavori = async (ville) => {
   try {
-    const res = await axios.get(`/api/weather/${encodeURIComponent(ville)}`)
+    const res = await getWeatherByCity(ville)
     meteoFavoris.value[ville] = res.data
   } catch {
     meteoFavoris.value[ville] = { error: 'Erreur météo' }
@@ -83,17 +77,25 @@ watch(
 
 const cities = computed(() => {
   return auth.isConnected
-    ? auth.favorites.map(fav => ({ 
-        id: fav.id,
-        name: fav.city,
-        meteo: meteoFavoris.value[fav.city],
-        imageSrc: getWeatherIcon(meteoFavoris.value[fav.city])
-      }))
-    : grandesVilles.map(ville => ({
-        name: ville.name,
-        meteo: meteoVilles.value[ville.name],
-        imageSrc: getWeatherIcon(meteoVilles.value[ville.name])
-      }))
+    ? auth.favorites.map(fav => {
+        const meteo = meteoFavoris.value[fav.city]
+        const { imageUrl } = useWeatherImage(ref(meteo))
+        return {
+          id: fav.id,
+          name: fav.city,
+          meteo,
+          imageSrc: imageUrl.value 
+        }
+      })
+    : grandesVilles.map(ville => {
+        const meteo = meteoVilles.value[ville.name]
+        const { imageUrl } = useWeatherImage(ref(meteo))
+        return {
+          name: ville.name,
+          meteo,
+          imageSrc: imageUrl.value 
+        }
+      })
 })
 
 const toggleSidebar = () => {
@@ -151,7 +153,7 @@ watch(newFavoriteCity, async (val) => {
   }
   isSearching.value = true
   try {
-    const res = await axios.get(`/api/search/${encodeURIComponent(val)}`)
+    const res = await searchCities(val)
     searchResults.value = res.data
   } catch {
     searchResults.value = []
@@ -210,8 +212,8 @@ const hasReachedFavoriteLimit = computed(() => auth.isConnected && auth.favorite
                 <span v-if="city.meteo && city.meteo.main && city.meteo.weather">
                   {{ Math.round(city.meteo.main.temp) }}°C
                   <img
-                    :src="`https://openweathermap.org/img/wn/${city.meteo.weather[0].icon}@2x.png`"
-                    :alt="city.meteo.weather[0].description"
+                    :src="city.imageSrc"
+                    :alt="city.meteo?.weather?.[0]?.description || city.name"
                     class="w-8 h-8 inline-block align-middle ml-2"
                   />
                 </span>

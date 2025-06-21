@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import { register, login } from '../services/services'
 
 const auth = useAuthStore()
 
@@ -16,15 +16,8 @@ const submitRegister = async (e) => {
   error.value = ''
   success.value = ''
   try {
-    await axios.post('/api/register', {
-      firstname: firstname.value,
-      email: email.value,
-      password: password.value
-    })
-    const loginRes = await axios.post('/api/login_check', {
-      username: email.value,
-      password: password.value
-    })
+    await register(firstname.value, email.value, password.value)
+    const loginRes = await login(email.value, password.value)
     localStorage.setItem('token', loginRes.data.token)
     success.value = 'Inscription réussie !'
     await auth.checkAuth()

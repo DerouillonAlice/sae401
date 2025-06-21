@@ -114,19 +114,22 @@
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { GridLayout, GridItem } from 'vue3-grid-layout'
-import {
-  CloudIcon,
-  DropletIcon,
-  EyeIcon,
-  WindIcon,
-  SunIcon,
-  BarChart3Icon
-} from 'lucide-vue-next'
+
+import SunCalc from 'suncalc'
 
 import iconLightRain from '@/assets/light-rain.png';
 import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
 import { useWeatherImage } from '@/composables/useWeatherImage'
+import { getWeatherByCity, getForecastByCity } from '../services/services'
+import { 
+  WindIcon, 
+  BarChart3Icon, 
+  DropletIcon, 
+  EyeIcon, 
+  CloudIcon, 
+  SunIcon 
+} from 'lucide-vue-next'
 
 const props = defineProps({
   selectedDayIndex: {
@@ -186,16 +189,15 @@ const { imageUrl } = useWeatherImage(currentDayData)
 
 function fetchWeather() {
   const ville = route.query.ville || 'Paris'
-  fetch(`/api/weather/${encodeURIComponent(ville)}`)
-    .then(res => res.json())
-    .then(data => { weatherData.value = data })
+  getWeatherByCity(ville)
+    .then(res => { weatherData.value = res.data })
 }
 
 function fetchForecast() {
   const ville = route.query.ville || 'Paris'
-  fetch(`/api/forecast/${encodeURIComponent(ville)}`)
-    .then(res => res.json())
-    .then(data => {
+  getForecastByCity(ville)
+    .then(res => {
+      const data = res.data
       if (Array.isArray(data.list)) {
         cityData.value = data.city
         
@@ -239,12 +241,22 @@ function fetchForecast() {
 }
 
 function fetchTodayForecast(forecastList) {
-  const getHourEntry = (hour) =>
-    forecastList.find(item => item.dt_txt && item.dt_txt.includes(` ${hour}:00:00`))
+  const findClosest = (targetHour, startHour, endHour) => {
+    const candidates = forecastList.filter(item => {
+      const hour = new Date(item.dt * 1000).getHours()
+      return hour >= startHour && hour < endHour
+    })
+    if (!candidates.length) return null
+    return candidates.reduce((prev, curr) => {
+      const prevHour = new Date(prev.dt * 1000).getHours()
+      const currHour = new Date(curr.dt * 1000).getHours()
+      return Math.abs(currHour - targetHour) < Math.abs(prevHour - targetHour) ? curr : prev
+    })
+  }
 
-  const matin = getHourEntry('10')
-  const apresmidi = getHourEntry('14')
-  const soir = getHourEntry('21')
+  const matin = findClosest(9, 6, 12)      // 6h-12h, cible 9h
+  const apresmidi = findClosest(15, 12, 18) // 12h-18h, cible 15h
+  const soir = findClosest(20, 18, 23)     // 18h-23h, cible 20h
 
   todayHourlyData.value = [
     matin && {
@@ -279,10 +291,22 @@ onMounted(() => {
   fetchForecast()
 })
 
+function isFrenchCity() {
+  return cityData.value?.country === 'FR'
+}
+
+function formatSunTime(date, timezoneOffsetSeconds) {
+  if (isFrenchCity()) {
+    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  }
+  const local = new Date(date.getTime() + timezoneOffsetSeconds * 1000)
+  return local.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+}
+
 function getBlockContent(name) {
   const data = currentDayData.value
   if (!data) return name
-  
+
   switch (name) {
     case 'Vent': return `${data.wind?.speed || 0} m/s`;
     case 'Pression': return `${data.main?.pressure || 0} hPa`;
@@ -290,49 +314,24 @@ function getBlockContent(name) {
     case 'Visibilité': return `${Math.round((data.visibility || 0) / 1000)} km`;
     case 'Nuages': return `${data.clouds?.all || 0} %`;
     case 'Cycle Soleil': {
-      if (selectedDayIndex.value === 0 && data.sys?.sunrise && data.sys?.sunset) {
-        const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        return `${sunrise} / ${sunset}`;
-      } else if (cityData.value?.sunrise && cityData.value?.sunset) {
-        const baseSunrise = cityData.value.sunrise
-        const baseSunset = cityData.value.sunset
-        
-        const dayOffset = selectedDayIndex.value
-        const minutesPerDay = 1.5 
-        
-        const adjustedSunrise = baseSunrise + (dayOffset * minutesPerDay * 60)
-        const adjustedSunset = baseSunset + (dayOffset * minutesPerDay * 60)
-        
-        const sunrise = new Date(adjustedSunrise * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        const sunset = new Date(adjustedSunset * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        
-        return `${sunrise} / ${sunset}`;
+      const tz = cityData.value?.timezone ?? 0
+      const lat = cityData.value?.coord?.lat
+      const lon = cityData.value?.coord?.lon
+      let date
+      if (selectedDayIndex.value === 0) {
+        date = new Date()
+      } else {
+        const dayData = forecastData.value[selectedDayIndex.value - 1]
+        date = dayData?.date || new Date()
       }
-      
-      const today = new Date()
-      const targetDate = new Date()
-      targetDate.setDate(today.getDate() + selectedDayIndex.value)
-      
-      const dayOfYear = Math.floor((targetDate - new Date(targetDate.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24)
-      
-      const sunriseMin = 5.75
-      const sunriseMax = 8.5  
-      const sunsetMin = 16.75  
-      const sunsetMax = 21.5 
-      
-      const seasonFactor = Math.cos(2 * Math.PI * (dayOfYear - 172) / 365)
-      
-      const sunriseDecimal = sunriseMin + (sunriseMax - sunriseMin) * (1 - seasonFactor) / 2
-      const sunsetDecimal = sunsetMax + (sunsetMin - sunsetMax) * (1 - seasonFactor) / 2
-      
-      const formatTime = (decimal) => {
-        const hours = Math.floor(decimal)
-        const minutes = Math.round((decimal - hours) * 60)
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+
+      if (lat && lon && date) {
+        const times = SunCalc.getTimes(date, lat, lon)
+        const sunrise = formatSunTime(times.sunrise, tz)
+        const sunset = formatSunTime(times.sunset, tz)
+        return `${sunrise} / ${sunset}`
       }
-      
-      return `${formatTime(sunriseDecimal)} / ${formatTime(sunsetDecimal)}`;
+      return '—'
     }
     default: return name;
   }
