@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/auth'
 import { ref, computed, watch } from 'vue'
 import { useWeatherImage } from '@/composables/useWeatherImage'
 import { useRouter, useRoute } from 'vue-router'
+import { formatTemperature } from '@/services/unitUtils'
 
 const { isSidebarOpen } = useSidebar()
 const auth = useAuthStore()
@@ -147,7 +148,7 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
                   v-if="city.meteo && city.meteo.main && city.meteo.weather"
                   class="text-2xl font-bold md:text-3xl"
                 >
-                  {{ Math.round(city.meteo.main.temp) }}°C
+                {{ formatTemperature(city.meteo.main.temp) }}
                 </span>
               </div>
               <img

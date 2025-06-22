@@ -21,11 +21,10 @@
 
               <div class="flex-1 flex flex-col justify-center items-center text-black text-center z-10 relative">
                 <p class="text-5xl font-extrabold">
-                  {{ currentDayData?.main?.temp ? Math.round(currentDayData.main.temp) + '°C' : '—' }}
+                  {{ formatTemperature(currentDayData?.main?.temp) }}
                 </p>
                 <p class="text-xl font-bold mt-2">
-                  Ressenti : {{ currentDayData?.main?.feels_like ? Math.round(currentDayData.main.feels_like) + '°C' :
-                    '—' }}
+                  Ressenti : {{ formatTemperature(currentDayData?.main?.feels_like) }}
                 </p>
                 <p class="text-lg mt-2 capitalize">
                   {{ currentDayData?.weather?.[0]?.description || '—' }}
@@ -41,7 +40,8 @@
                   class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2">
                   <div class="text-sm font-bold">{{ entry.label }}</div>
                   <img :src="getForecastIcon(entry.icon)" alt="Icon météo" class="w-10 h-10 mx-auto object-contain" />
-                  <div class="text-base font-semibold">{{ Math.round(entry.temp) }}°C</div>
+                  <div class="text-base font-semibold">  {{ formatTemperature(entry.temp) }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -121,6 +121,7 @@ import {
   SunIcon
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+import { formatTemperature, formatWind, formatPressure } from '@/services/unitUtils'
 
 const props = defineProps({
   selectedDayIndex: {
@@ -324,7 +325,7 @@ function getBlockContent(name) {
   if (!data) return name
 
   switch (name) {
-    case 'Vent': return `${data.wind?.speed || 0} m/s`;
+    case 'Vent': return formatWind(data.wind?.speed);
     case 'Cycle Soleil': {
       const tz = cityData.value?.timezone ?? 0
       const lat = cityData.value?.coord?.lat
@@ -345,7 +346,7 @@ function getBlockContent(name) {
       }
       return '—'
     }
-    case 'Pression': return `${data.main?.pressure || 0} hPa`;
+    case 'Pression': return formatPressure(data.main?.pressure);
     case 'Humidité': return `${data.main?.humidity || 0} %`;
     case 'Visibilité': return `${Math.round((data.visibility || 0) / 1000)} km`;
     case 'Nuages': return `${data.clouds?.all || 0} %`;
