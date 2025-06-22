@@ -95,11 +95,30 @@ class WeatherService
     // 6. Recherche 
     public function searchCity(string $query): array
     {
+        if (preg_match('/^\d{4,5}$/', $query)) {
+            $response = $this->client->request('GET', 'https://api.openweathermap.org/geo/1.0/zip', [
+                'query' => [
+                    'zip' => $query . ',FR',
+                    'appid' => $this->apiKey
+                ]
+            ]);
+    
+            $data = $response->toArray();
+    
+            return [[
+                'name' => $data['name'] ?? $query,
+                'lat' => $data['lat'],
+                'lon' => $data['lon'],
+                'country' => $data['country']
+            ]];
+        }
+    
         return $this->makeRequest('/geo/1.0/direct', [
             'q' => $query,
             'limit' => 5
         ], false);
     }
+    
 
 
     // Fonction utilitaire pour faire la requête à l'API OpenWeatherMap
