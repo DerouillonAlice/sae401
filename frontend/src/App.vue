@@ -4,27 +4,142 @@ import Footer from './components/Footer.vue'
 import Sidebar from './components/Sidebar.vue'
 import fond from './assets/fond.png'
 import { useSidebar } from './composables/useSidebar'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import 'swiper/swiper-bundle.css'
+import { useAuthStore } from '@/stores/auth'
+import { ref, computed, watch } from 'vue'
+import { useWeatherImage } from '@/composables/useWeatherImage'
+import { useRouter, useRoute } from 'vue-router'
 
 const { isSidebarOpen } = useSidebar()
+const auth = useAuthStore()
+const router = useRouter()
+const route = useRoute()
+
+const isHomeView = computed(() => route.name === 'HomeView')
+
+const grandesVilles = [
+  { name: 'Paris' },
+  { name: 'Londres' },
+  { name: 'New York' },
+  { name: 'Tokyo' },
+  { name: 'Sydney' }
+]
+
+const meteoVilles = ref({})
+const meteoFavoris = ref({})
+
+async function fetchMeteo(ville) {
+  try {
+    const { getWeatherByCity } = await import('@/services/services')
+    const res = await getWeatherByCity(ville)
+    meteoVilles.value = { ...meteoVilles.value, [ville]: res.data }
+  } catch {
+    meteoVilles.value = { ...meteoVilles.value, [ville]: { error: 'Erreur météo' } }
+  }
+}
+
+async function fetchMeteoFavori(ville) {
+  try {
+    const { getWeatherByCity } = await import('@/services/services')
+    const res = await getWeatherByCity(ville)
+    meteoFavoris.value[ville] = res.data
+  } catch {
+    meteoFavoris.value[ville] = { error: 'Erreur météo' }
+  }
+}
+
+watch(
+  () => auth.favorites,
+  (newFavorites) => {
+    newFavorites.forEach(fav => {
+      if (!meteoFavoris.value[fav.city]) {
+        fetchMeteoFavori(fav.city)
+      }
+    })
+  },
+  { immediate: true, deep: true }
+)
+
+watch(
+  () => auth.isConnected,
+  (connected) => {
+    if (!connected) {
+      grandesVilles.forEach(ville => {
+        if (!meteoVilles.value[ville.name]) {
+          fetchMeteo(ville.name)
+        }
+      })
+    }
+  },
+  { immediate: true }
+)
+
+const cities = computed(() => {
+  return auth.isConnected
+    ? auth.favorites.map(fav => {
+      const meteo = meteoFavoris.value[fav.city]
+      const { imageUrl } = useWeatherImage(ref(meteo))
+      return {
+        id: fav.id,
+        name: fav.city,
+        meteo,
+        imageSrc: imageUrl.value
+      }
+    })
+    : grandesVilles.map(ville => {
+      const meteo = meteoVilles.value[ville.name]
+      const { imageUrl } = useWeatherImage(ref(meteo))
+      return {
+        name: ville.name,
+        meteo,
+        imageSrc: imageUrl.value
+      }
+    })
+})
+
+function goToCity(cityName) {
+  router.push({
+    name: 'HomeView',
+    query: {
+      ville: cityName,
+      t: Date.now()
+    }
+  })
+}
 </script>
 
 <template>
-  <div
-    id="app"
-    class="h-screen flex bg-cover bg-center"
-    :style="{ backgroundImage: `url('${fond}')` }"
-  >
-    <Sidebar
-      class="transition-all duration-300 h-screen flex-shrink-0"
-      :class="isSidebarOpen ? 'w-64' : 'w-12'"
-    />
+  <div id="app" class="min-h-screen w-full flex bg-cover bg-center" :style="{ backgroundImage: `url('${fond}')` }">
+    <Sidebar class="transition-all duration-300 h-screen flex-shrink-0 hidden md:block"
+      :class="isSidebarOpen ? 'w-64' : 'w-12'" />
 
-    <div class="flex flex-col flex-1 h-screen">
+    <div class="flex flex-col flex-1 min-h-screen w-full">
       <Navbar />
-      <main class="flex-1 overflow-y-auto p-6">
+
+      <div v-if="isHomeView" class="md:hidden flex justify-center">
+        <Swiper :slides-per-view="1" :space-between="8" class="w-full h-20">
+          <SwiperSlide v-for="city in cities" :key="city.id || city.name" class="flex justify-center">
+            <div
+              class="w-full mx-4 bg-white/60 rounded-xl shadow flex flex-row items-center px-3 py-2 cursor-pointer"
+              @click="goToCity(city.name)">
+              <img v-if="city.imageSrc" :src="city.imageSrc" :alt="city.name" class="w-8 h-8 object-contain mr-2" />
+              <div class="flex flex-col flex-1 min-w-0">
+                <span class="text-xs font-semibold truncate">{{ city.name }}</span>
+                <span v-if="city.meteo && city.meteo.main && city.meteo.weather" class="text-base font-bold">
+                  {{ Math.round(city.meteo.main.temp) }}°C
+                </span>
+              </div>
+            </div>
+          </SwiperSlide>
+        </Swiper>
+      </div>
+
+      <main class="flex-1 overflow-y-auto md:p-6">
         <router-view class="h-full" />
       </main>
       <Footer class="pb-6 pt-4 mx-8" />
     </div>
   </div>
 </template>
+
