@@ -14,6 +14,7 @@ import {
   fetchFavorites as apiFetchFavorites
 } from '../services/services'
 import { useWeatherImage } from '@/composables/useWeatherImage' 
+import draggable from 'vuedraggable'
 const { isSidebarOpen } = useSidebar()
 const auth = useAuthStore()
 const router = useRouter()
@@ -190,6 +191,15 @@ function goToCity(cityName) {
 
 const MAX_FAVORITES = 7
 const hasReachedFavoriteLimit = computed(() => auth.isConnected && auth.favorites.length >= MAX_FAVORITES) 
+
+function onReorderEnd() {
+  const reordered = auth.favorites.map((fav, index) => ({
+    id: fav.id,
+    position: index
+  }))
+  auth.reorderFavorites(reordered)
+}
+
 </script>
 
 <template>
@@ -199,28 +209,69 @@ const hasReachedFavoriteLimit = computed(() => auth.isConnected && auth.favorite
     >
       <div v-if="isSidebarOpen" class="flex flex-col gap-4">
         <TransitionGroup name="fade" tag="div" class="contents">
-          <CityCard
-            v-for="(city, index) in cities"
-            :key="city.id || `${city.name}-${index}`"
-            :name="city.name"
-            :removable="auth.isConnected"
-            @remove="removeFavorite(city.id)"
-            @click="goToCity(city.name)"
+          <draggable
+            v-if="auth.isConnected"
+            v-model="auth.favorites"
+            item-key="id"
+            @end="onReorderEnd"
+            class="flex flex-col gap-4"
+            handle=".drag-handle"
           >
-            <template #default>
-              <div>
-                <span v-if="city.meteo && city.meteo.main && city.meteo.weather">
-                  {{ Math.round(city.meteo.main.temp) }}°C
-                  <img
-                    :src="city.imageSrc"
-                    :alt="city.meteo?.weather?.[0]?.description || city.name"
-                    class="w-8 h-8 inline-block align-middle ml-2"
-                  />
+            <template #item="{ element: fav, index }">
+              <div class="flex items-center">
+                <span class="drag-handle flex flex-col justify-center mr-2 cursor-grab select-none" style="width: 18px;">
+                  <span class="block w-4 h-0.5 bg-gray-400 rounded mb-0.5"></span>
+                  <span class="block w-4 h-0.5 bg-gray-400 rounded mb-0.5"></span>
+                  <span class="block w-4 h-0.5 bg-gray-400 rounded"></span>
                 </span>
-                <span v-else class="text-xs text-gray-400">Chargement...</span>
+                <CityCard
+                  :key="fav.id"
+                  :name="fav.city"
+                  :removable="true"
+                  @remove="removeFavorite(fav.id)"
+                  @click="goToCity(fav.city)"
+                  class="flex-1"
+                >
+                  <template #default>
+                    <div>
+                      <span v-if="meteoFavoris[fav.city] && meteoFavoris[fav.city].main && meteoFavoris[fav.city].weather">
+                        {{ Math.round(meteoFavoris[fav.city].main.temp) }}°C
+                        <img
+                          :src="useWeatherImage(ref(meteoFavoris[fav.city])).imageUrl.value"
+                          :alt="meteoFavoris[fav.city]?.weather?.[0]?.description || fav.city"
+                          class="w-8 h-8 inline-block align-middle ml-2"
+                        />
+                      </span>
+                      <span v-else class="text-xs text-gray-400">Chargement...</span>
+                    </div>
+                  </template>
+                </CityCard>
               </div>
             </template>
-          </CityCard>
+          </draggable>
+          <template v-else>
+            <CityCard
+              v-for="(city, index) in cities"
+              :key="city.id || `${city.name}-${index}`"
+              :name="city.name"
+              :removable="false"
+              @click="goToCity(city.name)"
+            >
+              <template #default>
+                <div>
+                  <span v-if="city.meteo && city.meteo.main && city.meteo.weather">
+                    {{ Math.round(city.meteo.main.temp) }}°C
+                    <img
+                      :src="city.imageSrc"
+                      :alt="city.meteo?.weather?.[0]?.description || city.name"
+                      class="w-8 h-8 inline-block align-middle ml-2"
+                    />
+                  </span>
+                  <span v-else class="text-xs text-gray-400">Chargement...</span>
+                </div>
+              </template>
+            </CityCard>
+          </template>
           <a href="/connexion">
           <CityCard
             v-if="!auth.isConnected"

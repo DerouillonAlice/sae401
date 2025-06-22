@@ -196,14 +196,21 @@ const dayForecastData = computed(() => {
 
 const { imageUrl } = useWeatherImage(currentDayData)
 
+function getDefaultVille() {
+  if (auth.isConnected && auth.favorites.length > 0) {
+    return auth.favorites[0].city
+  }
+  return 'Paris'
+}
+
 function fetchWeather() {
-  const ville = route.query.ville || 'Paris'
+  const ville = route.query.ville || getDefaultVille()
   getWeatherByCity(ville)
     .then(res => { weatherData.value = res.data })
 }
 
 function fetchForecast() {
-  const ville = route.query.ville || 'Paris'
+  const ville = route.query.ville || getDefaultVille()
   getForecastByCity(ville)
     .then(res => {
       const data = res.data
