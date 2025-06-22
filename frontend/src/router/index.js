@@ -33,11 +33,11 @@ const routes = [
     name: 'MentionsLegalesView',
     component: () => import('@/views/MentionsLegalesView.vue')
   },
-  // { 
-  //   path: '/contact',
-  //   name: 'ContactView',
-  //   component: () => import('@/views/ContactView.vue')
-  // },
+  { 
+    path: '/contact',
+    name: 'ContactView',
+    component: () => import('@/views/ContactView.vue')
+  },
 ]
 
 const router = createRouter({
