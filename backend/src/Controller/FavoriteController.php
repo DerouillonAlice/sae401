@@ -28,7 +28,7 @@ class FavoriteController extends AbstractController
     public function list(FavoriteRepository $favoriteRepo): JsonResponse
     {
         $user = $this->getUser();
-        $favorites = $favoriteRepo->findBy(['user' => $user]);
+        $favorites = $favoriteRepo->findBy(['user' => $user], ['position' => 'ASC']);
 
         return $this->json($favorites, 200, [], ['groups' => 'favorite:read']);
     }

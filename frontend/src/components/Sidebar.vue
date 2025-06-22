@@ -192,18 +192,14 @@ function goToCity(cityName) {
 const MAX_FAVORITES = 7
 const hasReachedFavoriteLimit = computed(() => auth.isConnected && auth.favorites.length >= MAX_FAVORITES) 
 
-async function reorderFavorites() {
-  const reordered = auth.favorites.map((fav, idx) => ({
+function onReorderEnd() {
+  const reordered = auth.favorites.map((fav, index) => ({
     id: fav.id,
-    position: idx
+    position: index
   }))
-  try {
-    await apiFetchFavorites.reorder(reordered) 
-    await auth.fetchFavorites() 
-  } catch (e) {
-    console.error('Erreur lors du reorder', e)
-  }
+  auth.reorderFavorites(reordered)
 }
+
 </script>
 
 <template>
@@ -217,7 +213,7 @@ async function reorderFavorites() {
             v-if="auth.isConnected"
             v-model="auth.favorites"
             item-key="id"
-            @end="reorderFavorites"
+            @end="onReorderEnd"
             class="flex flex-col gap-4"
             handle=".drag-handle"
           >
