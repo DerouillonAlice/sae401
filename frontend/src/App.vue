@@ -126,7 +126,7 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
         <Swiper
           :slides-per-view="1"
           :space-between="8"
-          class="w-full h-20"
+          class="w-full h-24"
           :modules="[Pagination]"
           :loop="true"
           :pagination="{ clickable: true }"
@@ -137,15 +137,26 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
             class="flex justify-center"
           >
             <div
-              class="w-full mx-4 bg-white/40 rounded-xl shadow flex flex-row items-center px-3 py-2 cursor-pointer"
-              @click="goToCity(city.name)">
-              <img v-if="city.imageSrc" :src="city.imageSrc" :alt="city.name" class="w-8 h-8 object-contain mr-2" />
+              class="w-full mx-4 bg-white/40 rounded-xl shadow flex flex-row items-center px-4 py-4 cursor-pointer"
+              @click="goToCity(city.name)"
+              style="min-height: 90px;"
+            >
               <div class="flex flex-col flex-1 min-w-0">
-                <span class="text-xs font-semibold truncate">{{ city.name }}</span>
-                <span v-if="city.meteo && city.meteo.main && city.meteo.weather" class="text-base font-bold">
+                <span class="font-bold truncate text-lg sm:text-xl md:text-2xl mb-1">{{ city.name }}</span>
+                <span
+                  v-if="city.meteo && city.meteo.main && city.meteo.weather"
+                  class="text-2xl font-bold md:text-3xl"
+                >
                   {{ Math.round(city.meteo.main.temp) }}°C
                 </span>
               </div>
+              <img
+                v-if="city.imageSrc"
+                :src="city.imageSrc"
+                :alt="city.name"
+                class="w-20 h-20 object-contain ml-4"
+                style="min-width: 80px;"
+              />
             </div>
           </SwiperSlide>
         </Swiper>
@@ -159,3 +170,8 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
   </div>
 </template>
 
+<style>
+.swiper-pagination-bullet-active {
+  background: black !important;
+}
+</style>
