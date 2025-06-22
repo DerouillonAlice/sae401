@@ -26,7 +26,18 @@ const routes = [
     path: '/connexion',
     name: 'ConnexionView',
     component: () => import('@/views/ConnexionView.vue')
-  }
+  },
+
+  {
+    path :'/mentions-legales',
+    name: 'MentionsLegalesView',
+    component: () => import('@/views/MentionsLegalesView.vue')
+  },
+  // { 
+  //   path: '/contact',
+  //   name: 'ContactView',
+  //   component: () => import('@/views/ContactView.vue')
+  // },
 ]
 
 const router = createRouter({
