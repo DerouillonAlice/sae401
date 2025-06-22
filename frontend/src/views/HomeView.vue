@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue'
 import WeatherDetailsGrid from '../components/WeatherDetailsGrid.vue'
-import Sidebar from '../components/Sidebar.vue'
 import WeekdaysTab from '../components/WeekdaysTab.vue'
 import CityHeading from '../components/CityHeading.vue'
 
@@ -13,8 +12,8 @@ const handleDayChange = (dayIndex) => {
 </script>
 
 <template>
-    <main class="grid grid-cols-1">
-        <section class="grid gap-4 mx-8 ">
+    <main class="grid grid-cols-1 ">
+        <section class="grid gap-4 mx-4 mt-4 ">
             <CityHeading />
 
             <WeekdaysTab @update:modelValue="handleDayChange" />
