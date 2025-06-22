@@ -33,14 +33,19 @@ import { useAuthStore } from '@/stores/auth'
 const route = useRoute()
 const auth = useAuthStore()
 
-const villeAffichee = computed(() => route.query.ville || 'Paris')
+function getDefaultVille() {
+  if (auth.isConnected && auth.favorites.length > 0) {
+    return auth.favorites[0].city
+  }
+  return 'Paris'
+}
 
-// Vérifie si la ville est dans les favoris
+const villeAffichee = computed(() => route.query.ville || getDefaultVille())
+
 const isFavorite = computed(() =>
   auth.favorites.some(fav => fav.city.toLowerCase() === villeAffichee.value.toLowerCase())
 )
 
-// Ajoute ou supprime la ville des favoris
 const toggleFavorite = async () => {
   if (isFavorite.value) {
     await auth.removeFavorite(villeAffichee.value)
