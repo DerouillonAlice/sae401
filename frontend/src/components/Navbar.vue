@@ -139,7 +139,7 @@ const onSearchInput = async () => {
   try {
     const response = await searchCities(searchQuery.value) 
     searchResults.value = response.data.filter((result, index, self) =>
-      index === self.findIndex((r) => r.name === result.name)
+      index === self.findIndex((r) => r.name === result.name && r.country === result.country)
     )
   } catch (error) {
     console.error('Erreur lors de la recherche de ville :', error)

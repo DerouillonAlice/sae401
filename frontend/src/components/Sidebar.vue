@@ -156,7 +156,9 @@ watch(newFavoriteCity, async (val) => {
   isSearching.value = true
   try {
     const res = await searchCities(val)
-    searchResults.value = res.data
+    searchResults.value = res.data.filter((result, index, self) =>
+      index === self.findIndex((r) => r.name === result.name && r.country === result.country)
+    )
   } catch {
     searchResults.value = []
   }
