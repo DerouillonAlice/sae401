@@ -63,21 +63,38 @@
         </svg>
       </button>
       <template v-if="!auth.isConnected">
-        <button @click="goToLogin"
-                      class="px-6 py-2 rounded-full bg-white/60 backdrop-blur-md  border-white/70 hover:bg-white/70 transition-all duration-300 font-semibold">
-                      Connexion
-                    </button>
-                    <button @click="goToRegister"
-                      class="px-6 py-2 rounded-full bg-black text-white shadow hover:bg-black/90 transition-all duration-300 font-semibold">
-                      Inscription
-                    </button>
+        <div class="hidden md:flex flex-row gap-2">
+          <button @click="goToLogin"
+            class="px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border-white/70 hover:bg-white/70 transition-all duration-300 font-semibold text-sm">
+            Connexion
+          </button>
+          <button @click="goToRegister"
+            class="px-4 py-2 rounded-full bg-black text-white shadow hover:bg-black/90 transition-all duration-300 font-semibold text-sm">
+            Inscription
+          </button>
+        </div>
+        <div class="flex md:hidden relative">
+          <button @click="showAccountMenu = !showAccountMenu"
+            class="p-2 rounded-full bg-white/60 backdrop-blur-md border-white/70 shadow hover:bg-white/70 transition-all duration-300">
+            <UserIcon class="w-6 h-6" />
+          </button>
+          <div v-if="showAccountMenu"
+            ref="accountMenuRef"
+            class="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg border z-50 flex flex-col"
+          >
+            <button @click="goToLogin"
+              class="px-4 py-2 text-left hover:bg-gray-100 rounded-t-xl transition">Connexion</button>
+            <button @click="goToRegister"
+              class="px-4 py-2 text-left hover:bg-gray-100 rounded-b-xl transition">Inscription</button>
+          </div>
+        </div>
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { UserIcon } from '@heroicons/vue/24/solid'
@@ -88,13 +105,29 @@ import { searchCities } from '../services/services'
 const searchQuery = ref('')
 const searchResults = ref([]) 
 const isSearching = ref(false) 
+const showAccountMenu = ref(false)
+const accountMenuRef = ref(null)
 const router = useRouter()
 const auth = useAuthStore()
 
+function handleClickOutside(event) {
+  if (
+    showAccountMenu.value &&
+    accountMenuRef.value &&
+    !accountMenuRef.value.contains(event.target)
+  ) {
+    showAccountMenu.value = false
+  }
+}
+
 onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
   if (localStorage.getItem('token')) {
     auth.checkAuth()
   }
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
 })
 
 const onSearchInput = async () => {
@@ -138,10 +171,12 @@ const goToProfile = () => {
 }
 
 const goToRegister = () => {
+  showAccountMenu.value = false
   router.push({ path: '/inscription' })
 }
 
 const goToLogin = () => {
+  showAccountMenu.value = false
   router.push({ path: '/connexion' })
 }
 
