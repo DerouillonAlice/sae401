@@ -5,7 +5,9 @@ import Sidebar from './components/Sidebar.vue'
 import fond from './assets/fond.png'
 import { useSidebar } from './composables/useSidebar'
 import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Pagination } from 'swiper/modules'
 import 'swiper/swiper-bundle.css'
+import 'swiper/css/pagination'
 import { useAuthStore } from '@/stores/auth'
 import { ref, computed, watch } from 'vue'
 import { useWeatherImage } from '@/composables/useWeatherImage'
@@ -107,6 +109,9 @@ function goToCity(cityName) {
     }
   })
 }
+
+import { inject } from 'vue'
+const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
 </script>
 
 <template>
@@ -117,9 +122,20 @@ function goToCity(cityName) {
     <div class="flex flex-col flex-1 min-h-screen w-full">
       <Navbar />
 
-      <div v-if="isHomeView" class="md:hidden flex justify-center">
-        <Swiper :slides-per-view="1" :space-between="8" class="w-full h-20">
-          <SwiperSlide v-for="city in cities" :key="city.id || city.name" class="flex justify-center">
+      <div v-if="isHomeView" class="md:hidden flex flex-col items-center justify-center">
+        <Swiper
+          :slides-per-view="1"
+          :space-between="8"
+          class="w-full h-20"
+          :modules="[Pagination]"
+          :loop="true"
+          :pagination="{ clickable: true }"
+        >
+          <SwiperSlide
+            v-for="city in cities"
+            :key="city.id || city.name"
+            class="flex justify-center"
+          >
             <div
               class="w-full mx-4 bg-white/60 rounded-xl shadow flex flex-row items-center px-3 py-2 cursor-pointer"
               @click="goToCity(city.name)">
