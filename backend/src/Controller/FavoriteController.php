@@ -59,8 +59,14 @@ class FavoriteController extends AbstractController
         ]
     )]
     #[Route('', name: 'favorite_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em): JsonResponse
+    public function create(Request $request, EntityManagerInterface $em, FavoriteRepository $favoriteRepo): JsonResponse
     {
+        $user = $this->getUser();
+        $count = $favoriteRepo->count(['user' => $user]);
+        if ($count >= 7) {
+            return $this->json(['error' => 'Vous ne pouvez pas avoir plus de 7 favoris.'], 400);
+        }
+
         $data = json_decode($request->getContent(), true);
         $favorite = new Favorite();
 
