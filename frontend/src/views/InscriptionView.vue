@@ -30,7 +30,7 @@ const submitRegister = async (e) => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center flex-1">
+  <div class="flex justify-center items-center flex-1 mx-4 md:mx-0">
     <form
       class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-md"
       @submit="submitRegister"

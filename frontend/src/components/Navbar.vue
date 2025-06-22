@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 pl-14 flex items-center justify-between gap-4 w-full mx-auto">
+  <div class="p-4 md:pl-14 flex items-center justify-between gap-4 w-full mx-auto">
 
     <div class="flex items-center">
       <router-link
