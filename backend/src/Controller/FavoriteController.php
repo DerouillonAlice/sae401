@@ -150,4 +150,45 @@ class FavoriteController extends AbstractController
 
         return $this->json(['message' => 'Favorite deleted']);
     }
+
+    #[OA\Post(
+        path: '/favorites/reorder',
+        summary: 'Met à jour l\'ordre des favoris',
+        tags: ['Favoris'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: 'array',
+                items: new OA\Items(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer'),
+                        new OA\Property(property: 'position', type: 'integer')
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Ordre mis à jour')
+        ]
+    )]
+    #[Route('/reorder', name: 'favorite_reorder', methods: ['POST'])]
+    public function reorder(Request $request, EntityManagerInterface $em, FavoriteRepository $favoriteRepo): JsonResponse
+    {
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true);
+
+        if (!is_array($data)) {
+            return $this->json(['error' => 'Invalid data'], 400);
+        }
+
+        foreach ($data as $favData) {
+            $favorite = $favoriteRepo->find($favData['id'] ?? 0);
+            if ($favorite && $favorite->getUser() === $user) {
+                $favorite->setPosition($favData['position']);
+            }
+        }
+        $em->flush();
+
+        return $this->json(['message' => 'Ordre des favoris mis à jour']);
+    }
 }
