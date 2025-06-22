@@ -4,6 +4,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useSidebar } from '@/composables/useSidebar'
 import { useAuthStore } from '@/stores/auth'
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
+import { formatTemperature, formatWind, formatPressure } from '@/services/unitUtils'
 import fond from '../assets/fond.png'
 import { useRouter } from 'vue-router'
 import {
@@ -235,7 +236,7 @@ function onReorderEnd() {
                   <template #default>
                     <div>
                       <span v-if="meteoFavoris[fav.city] && meteoFavoris[fav.city].main && meteoFavoris[fav.city].weather">
-                        {{ Math.round(meteoFavoris[fav.city].main.temp) }}°C
+                        {{ formatTemperature(meteoFavoris[fav.city].main.temp) }}
                         <img
                           :src="useWeatherImage(ref(meteoFavoris[fav.city])).imageUrl.value"
                           :alt="meteoFavoris[fav.city]?.weather?.[0]?.description || fav.city"
@@ -260,7 +261,7 @@ function onReorderEnd() {
               <template #default>
                 <div>
                   <span v-if="city.meteo && city.meteo.main && city.meteo.weather">
-                    {{ Math.round(city.meteo.main.temp) }}°C
+                    {{ formatTemperature(city.meteo.main.temp) }}
                     <img
                       :src="city.imageSrc"
                       :alt="city.meteo?.weather?.[0]?.description || city.name"
