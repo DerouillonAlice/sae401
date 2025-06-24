@@ -65,3 +65,11 @@ export const changePassword = (oldPassword, newPassword) => {
     }
   })
 }
+
+export const updateFavoriteConfig = (favoriteId, config) => {
+  return axios.put(`/api/favorites/${favoriteId}`, config, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+}

@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { GridLayout, GridItem } from 'vue3-grid-layout'
@@ -111,7 +111,7 @@ import iconLightRain from '@/assets/light-rain.png';
 import iconRain from '@/assets/rain.png';
 import iconSun from '@/assets/sun.png';
 import { useWeatherImage } from '@/composables/useWeatherImage'
-import { getWeatherByCity, getForecastByCity } from '../services/services'
+import { getWeatherByCity, getForecastByCity, updateFavoriteConfig } from '../services/services'
 import {
   WindIcon,
   BarChart3Icon,
@@ -412,6 +412,9 @@ const layout = ref([]);
 const colNum = ref(3);
 const containerWidth = ref(window.innerWidth || 1200);
 
+const currentFavorite = ref(null)
+const isLoadingConfig = ref(false)
+
 function updateColNum() {
   const width = window.innerWidth;
   colNum.value = width < 640 ? 1 : 3;
@@ -433,9 +436,9 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateContainerWidth);
 });
 
-watch(() => allBlocks.value.map((b) => b.active), () => {
-  const activeBlocks = allBlocks.value.filter((b) => b.active);
-  const isMobile = window.innerWidth < 640;
+function generateDefaultLayout() {
+  const activeBlocks = allBlocks.value.filter((b) => b.active)
+  const isMobile = window.innerWidth < 640
 
   if (isMobile) {
     layout.value = activeBlocks.map((block, index) => ({
@@ -445,13 +448,19 @@ watch(() => allBlocks.value.map((b) => b.active), () => {
       w: 1,
       h: 1,
       name: block.name,
-    }));
+    }))
   } else {
-    const config = predefinedLayouts[activeBlocks.length] || [];
+    const config = predefinedLayouts[activeBlocks.length] || []
     layout.value = config.map((l, index) => ({
       ...l,
       name: activeBlocks[index]?.name || 'Bloc',
-    }));
+    }))
+  }
+}
+
+watch(() => allBlocks.value.map((b) => b.active), () => {
+  if (!isLoadingConfig.value) {
+    generateDefaultLayout()
   }
 }, { immediate: true });
 
@@ -459,34 +468,119 @@ let isUpdating = false
 let updateTimeout
 
 function updateLayout(newLayout) {
-  if (isUpdating) return;
+  if (isUpdating || isLoadingConfig.value) return;
   isUpdating = true;
   clearTimeout(updateTimeout);
 
-  const isMobile = window.innerWidth < 640;
-
-  if (isMobile) {
-    layout.value = newLayout.map((item) => ({ ...item, x: 0, w: 1, h: 1 }));
-    return;
-  }
-
   updateTimeout = setTimeout(() => {
-    const activeBlocks = allBlocks.value.filter((b) => b.active)
-    const layoutDef = predefinedLayouts[activeBlocks.length] || []
-    const sortedItems = newLayout.slice().sort((a, b) => a.y - b.y || a.x - b.x)
-    const correctedLayout = layoutDef.map((slot, index) => {
-      const movedBlock = sortedItems[index]
-      const original = layout.value.find((l) => l.i === movedBlock.i)
-      return { ...slot, i: movedBlock.i, name: original?.name || 'Bloc' }
-    })
+    const isMobile = window.innerWidth < 640;
 
-    if (JSON.stringify(layout.value) !== JSON.stringify(correctedLayout)) {
-      layout.value = correctedLayout
+    if (isMobile) {
+      const sortedLayout = newLayout.slice().sort((a, b) => a.y - b.y)
+      layout.value = sortedLayout.map((item, index) => ({
+        ...item,
+        x: 0,
+        y: index,
+        w: 1,
+        h: 1
+      }))
+    } else {
+      layout.value = newLayout
+    }
+
+    if (!isLoadingConfig.value && currentFavorite.value) {
+      saveFavoriteConfig()
     }
 
     isUpdating = false
-  }, 50)
+  }, 100)
 }
+
+function loadFavoriteConfig() {
+  const ville = route.query.ville || getDefaultVille()
+  
+  if (auth.isConnected) {
+    isLoadingConfig.value = true
+    
+    currentFavorite.value = auth.favorites.find(fav => 
+      fav.city.toLowerCase() === ville.toLowerCase()
+    )
+    
+    if (currentFavorite.value) {
+      allBlocks.value.forEach(block => {
+        switch(block.name) {
+          case 'Vent': block.active = currentFavorite.value.showWind; break;
+          case 'Cycle Soleil': block.active = currentFavorite.value.showSunCycle; break;
+          case 'Humidité': block.active = currentFavorite.value.showHumidity; break;
+          case 'Visibilité': block.active = currentFavorite.value.showVisibility; break;
+          case 'Nuages': block.active = currentFavorite.value.showUV; break;
+          case 'Pression': block.active = currentFavorite.value.showPressure; break;
+        }
+      })
+      
+      if (currentFavorite.value.gridLayout && currentFavorite.value.gridLayout.length > 0) {
+        layout.value = [...currentFavorite.value.gridLayout]
+      } else {
+        generateDefaultLayout()
+      }
+    } else {
+      allBlocks.value.forEach(block => {
+        block.active = true
+      })
+      generateDefaultLayout()
+    }
+    
+    nextTick(() => {
+      setTimeout(() => {
+        isLoadingConfig.value = false
+      }, 200)
+    })
+  }
+}
+
+let saveTimeout
+async function saveFavoriteConfig() {
+  if (!currentFavorite.value || isLoadingConfig.value) return
+  
+  clearTimeout(saveTimeout)
+  saveTimeout = setTimeout(async () => {
+    const config = {
+      showWind: allBlocks.value.find(b => b.name === 'Vent')?.active || false,
+      showSunCycle: allBlocks.value.find(b => b.name === 'Cycle Soleil')?.active || false,
+      showHumidity: allBlocks.value.find(b => b.name === 'Humidité')?.active || false,
+      showVisibility: allBlocks.value.find(b => b.name === 'Visibilité')?.active || false,
+      showPressure: allBlocks.value.find(b => b.name === 'Pression')?.active || false,
+      showUV: allBlocks.value.find(b => b.name === 'Nuages')?.active || false,
+      gridLayout: layout.value
+    }
+    
+    try {
+      await updateFavoriteConfig(currentFavorite.value.id, config)
+      const currentFavId = currentFavorite.value.id
+      await auth.fetchFavorites()
+      currentFavorite.value = auth.favorites.find(fav => fav.id === currentFavId)
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error)
+    }
+  }, 500)
+}
+
+watch(() => allBlocks.value.map(b => b.active), () => {
+  if (!isLoadingConfig.value && currentFavorite.value) {
+    generateDefaultLayout()
+    saveFavoriteConfig()
+  }
+}, { deep: true })
+
+watch(() => route.query.ville, () => {
+  loadFavoriteConfig()
+}, { immediate: true })
+
+watch(() => auth.favorites, (newFavorites, oldFavorites) => {
+  if (newFavorites.length > 0 && (!oldFavorites || oldFavorites.length === 0)) {
+    loadFavoriteConfig()
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
