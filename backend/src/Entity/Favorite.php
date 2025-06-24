@@ -55,6 +55,10 @@ class Favorite
     #[Groups(['favorite:read'])]
     private bool $showVisibility = false;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['favorite:read'])]
+    private ?array $gridLayout = null;
+
     #[ORM\ManyToOne(inversedBy: 'favorites')]
     private ?User $user = null;
 
@@ -162,6 +166,16 @@ class Favorite
     public function setShowVisibility(bool $val): static
     {
         $this->showVisibility = $val;
+        return $this;
+    }
+
+    public function getGridLayout(): ?array
+    {
+        return $this->gridLayout;
+    }
+    public function setGridLayout(?array $gridLayout): static
+    {
+        $this->gridLayout = $gridLayout;
         return $this;
     }
 
