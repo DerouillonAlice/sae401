@@ -17,7 +17,7 @@
             <div
               :class="[
               'relative rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
-              auth.isConnected && layout.length > 0 ? 'flex-1' : 'flex-1 lg:flex-[2]'
+              auth.isConnected && layout.length > 0 ? 'flex-1' : auth.isConnected ? 'w-full' : 'w-full lg:max-w-md'
             ]">
               <img :src="imageUrl" alt="Météo"
                 class="absolute -top-28 -right-60 max-h-[580px] max-w-[580px] object-contain pointer-events-none z-0 opacity-90" />
@@ -75,8 +75,7 @@
               </GridLayout>
             </div>
 
-            <!-- Vue non connectée reste la même -->
-            <div v-else-if="!auth.isConnected" class="flex-1 flex flex-col gap-4">
+            <div v-else-if="!auth.isConnected" class="flex-1 lg:flex-[2] flex flex-col gap-4">
               <div class="flex flex-col lg:flex-row gap-4 items-stretch h-full min-h-[220px]">
                 <div
                   v-for="block in allBlocks.slice(0, 3)"
