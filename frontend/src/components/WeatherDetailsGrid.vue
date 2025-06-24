@@ -15,7 +15,10 @@
 
           <div class="flex flex-col lg:flex-row gap-4 items-stretch">
             <div
-              class="relative flex-1 rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden">
+              :class="[
+              'relative rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
+              auth.isConnected && layout.length > 0 ? 'flex-1' : 'flex-1 lg:flex-[2]'
+            ]">
               <img :src="imageUrl" alt="Météo"
                 class="absolute -top-28 -right-60 max-h-[580px] max-w-[580px] object-contain pointer-events-none z-0 opacity-90" />
 
@@ -40,18 +43,27 @@
                   class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2">
                   <div class="text-sm font-bold">{{ entry.label }}</div>
                   <img :src="getForecastIcon(entry.icon)" alt="Icon météo" class="w-10 h-10 mx-auto object-contain" />
-                  <div class="text-base font-semibold">  {{ formatTemperature(entry.temp) }}
-                  </div>
+                  <div class="text-base font-semibold">{{ formatTemperature(entry.temp) }}</div>
                 </div>
               </div>
             </div>
 
-            <div v-if="auth.isConnected" class="flex-1">
-              <GridLayout ref="gridLayoutRef" :layout="layout" :col-num="colNum" :row-height="auto" :is-draggable="true"
-                :is-resizable="false" :auto-size="true" :use-css-transforms="false" :vertical-compact="false"
-                :width="containerWidth" class="h-full gap-4 mt-0" @layout-updated="updateLayout">
-                <GridItem v-for="item in layout" :key="item.i" :i="item.i" :x="item.x" :y="item.y" :w="item.w"
-                  :h="item.h">
+            <div v-if="auth.isConnected && layout.length > 0" class="flex-1">
+              <GridLayout 
+                ref="gridLayoutRef" 
+                :layout="layout" 
+                :col-num="colNum" 
+                :row-height="auto" 
+                :is-draggable="true"
+                :is-resizable="false" 
+                :auto-size="true" 
+                :use-css-transforms="false" 
+                :vertical-compact="false"
+                :width="containerWidth" 
+                class="h-full gap-4 mt-0" 
+                @layout-updated="updateLayout"
+              >
+                <GridItem v-for="item in layout" :key="item.i" :i="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h">
                   <div
                     class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2">
                     <component :is="getIconComponent(item.name)" class="w-10 h-10 text-black" />
@@ -63,7 +75,8 @@
               </GridLayout>
             </div>
 
-            <div v-else class="flex-1 flex flex-col gap-4">
+            <!-- Vue non connectée reste la même -->
+            <div v-else-if="!auth.isConnected" class="flex-1 flex flex-col gap-4">
               <div class="flex flex-col lg:flex-row gap-4 items-stretch h-full min-h-[220px]">
                 <div
                   v-for="block in allBlocks.slice(0, 3)"
@@ -439,6 +452,12 @@ onUnmounted(() => {
 function generateDefaultLayout() {
   const activeBlocks = allBlocks.value.filter((b) => b.active)
   const isMobile = window.innerWidth < 640
+
+  // Si aucun bloc actif, on vide le layout
+  if (activeBlocks.length === 0) {
+    layout.value = []
+    return
+  }
 
   if (isMobile) {
     layout.value = activeBlocks.map((block, index) => ({
