@@ -138,7 +138,7 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
             class="flex justify-center"
           >
             <div
-              class="w-full mx-4 bg-white/40 rounded-xl shadow flex flex-row items-center px-4 py-4 cursor-pointer"
+              class="w-full mx-4 bg-white/40 rounded-md shadow flex flex-row items-center px-4 py-4 cursor-pointer"
               @click="goToCity(city.name)"
               style="min-height: 90px;"
             >
