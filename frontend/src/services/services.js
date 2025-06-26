@@ -145,3 +145,12 @@ export const changePassword = async (oldPassword, newPassword) => {
     return handleError(error)
   }
 }
+
+
+export const updateFavoriteConfig = (favoriteId, config) => {
+  return axios.put(`/api/favorites/${favoriteId}`, config, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+}
