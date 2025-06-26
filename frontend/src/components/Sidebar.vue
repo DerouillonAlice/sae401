@@ -336,7 +336,9 @@ function onReorderEnd() {
           @click="selectCity(city)"
           class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition rounded"
         >
-          {{ city.name }} <span v-if="city.country">({{ city.country }})</span>
+          {{ city.name }}
+          <span v-if="city.postalCode" class="text-sm text-gray-500"> ({{ city.postalCode }})</span>
+          <span v-if="city.country" class="text-sm text-gray-500"> ({{ city.country }})</span>
         </li>
       </ul>
 
