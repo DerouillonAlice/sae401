@@ -32,21 +32,16 @@ const meteoVilles = ref({})
 const meteoFavoris = ref({})
 
 const fetchMeteo = async (ville) => {
-  try { 
-    const res = await getWeatherByCity(ville)
-    meteoVilles.value = { ...meteoVilles.value, [ville]: res.data }
-  } catch {
-    meteoVilles.value = { ...meteoVilles.value, [ville]: { error: 'Erreur météo' } }
+  const res = await getWeatherByCity(ville)
+  meteoVilles.value = {
+    ...meteoVilles.value,
+    [ville]: res.success ? res.data : { error: res.message }
   }
 }
 
 const fetchMeteoFavori = async (ville) => {
-  try {
-    const res = await getWeatherByCity(ville)
-    meteoFavoris.value[ville] = res.data
-  } catch {
-    meteoFavoris.value[ville] = { error: 'Erreur météo' }
-  }
+  const res = await getWeatherByCity(ville)
+  meteoFavoris.value[ville] = res.success ? res.data : { error: res.message }
 }
 
 watch(
@@ -245,6 +240,9 @@ function onReorderEnd() {
                           class="w-8 h-8 inline-block align-middle ml-2"
                         />
                       </span>
+                      <span v-else-if="meteoFavoris[fav.city]?.error" class="text-xs text-red-500">
+                        {{ meteoFavoris[fav.city].error }}
+                      </span>
                       <span v-else class="text-xs text-gray-400">Chargement...</span>
                     </div>
                   </template>
@@ -270,20 +268,23 @@ function onReorderEnd() {
                       class="w-8 h-8 inline-block align-middle ml-2"
                     />
                   </span>
+                  <span v-else-if="city.meteo?.error" class="text-xs text-red-500">
+                    {{ city.meteo.error }}
+                  </span>
                   <span v-else class="text-xs text-gray-400">Chargement...</span>
                 </div>
               </template>
             </CityCard>
           </template>
           <a href="/connexion">
-          <CityCard
-            v-if="!auth.isConnected"
-            name="Connectez-vous pour ajouter vos favoris"
-            imageSrc=""
-            isPlaceholder
-            customClass="connect-card"
-          />
-        </a>
+            <CityCard
+              v-if="!auth.isConnected"
+              name="Connectez-vous pour ajouter vos favoris"
+              imageSrc=""
+              isPlaceholder
+              customClass="connect-card"
+            />
+          </a>
           <CityCard
             v-if="auth.isConnected && !hasReachedFavoriteLimit"
             name="Ajouter une ville à vos favoris"
@@ -308,28 +309,29 @@ function onReorderEnd() {
     </section>
 
     <transition name="fade">
-  <div
-    v-if="showAddFavorite"
-    class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
+      <div
+        v-if="showAddFavorite"
+        class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
     
-  >
+      >
     <div class=" backdrop-blur-lg bg-white/40 rounded-2xl shadow-xl  w-full max-w-sm text-gray-800"
-    :style="{ backgroundImage: `url('${fond}')` }">
+             :style="{ backgroundImage: `url('${fond}')` }">
     <div class="overlay bg-white/50  inset-0 w-full h-full rounded-2xl p-6">
 
-      <h3 class="text-xl font-semibold mb-4 text-center">Ajouter une ville à vos favoris</h3>
+            <h3 class="text-xl font-semibold mb-4 text-center">Ajouter une ville à vos favoris</h3>
 
-      <input
-        v-model="newFavoriteCity"
-        type="text"
-        placeholder="Nom de la ville"
-        class="w-full px-4 py-2 rounded-xl shadow bg-white placeholder-gray-500 focus:outline-none mb-2"
-      />
+            <input
+              v-model="newFavoriteCity"
+              type="text"
+              placeholder="Nom de la ville"
+              class="w-full px-4 py-2 rounded-xl shadow bg-white placeholder-gray-500 focus:outline-none mb-2"
+            />
 
       <ul
         v-if="searchResults.length"
         class="bg-white border rounded-xl shadow-inner max-h-40 overflow-y-auto mb-4"
       >
+
         <li
           v-for="city in searchResults"
           :key="city.id"
@@ -342,31 +344,31 @@ function onReorderEnd() {
         </li>
       </ul>
 
-      <div class="flex gap-2 justify-end">
-        <button
-          @click="submitAddFavorite"
-          class="bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition font-semibold"
-        >
-          Ajouter
-        </button>
-        <button
-          @click="showAddFavorite = false"
-          class="bg-white px-4 py-2 rounded-xl shadow hover:bg-gray-100 transition"
-        >
-          Annuler
-        </button>
-      </div>
+            <div class="flex gap-2 justify-end">
+              <button
+                @click="submitAddFavorite"
+                class="bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition font-semibold"
+              >
+                Ajouter
+              </button>
+              <button
+                @click="showAddFavorite = false"
+                class="bg-white px-4 py-2 rounded-xl shadow hover:bg-gray-100 transition"
+              >
+                Annuler
+              </button>
+            </div>
 
-      <div v-if="addFavoriteError" class="text-red-600 mt-3 text-sm text-center">
-        {{ addFavoriteError }}
+            <div v-if="addFavoriteError" class="text-red-600 mt-3 text-sm text-center">
+              {{ addFavoriteError }}
+            </div>
+            <div v-if="addFavoriteSuccess" class="text-green-600 mt-3 text-sm text-center">
+              {{ addFavoriteSuccess }}
+            </div>
+          </div>
+        </div>
       </div>
-      <div v-if="addFavoriteSuccess" class="text-green-600 mt-3 text-sm text-center">
-        {{ addFavoriteSuccess }}
-      </div>
-    </div>
-  </div>
-  </div>
-</transition>
+    </transition>
 
   </main>
 </template>
