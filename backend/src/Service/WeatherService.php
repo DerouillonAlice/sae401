@@ -104,10 +104,11 @@ class WeatherService
                 'name' => $data['name'] ?? $query,
                 'lat' => $data['lat'],
                 'lon' => $data['lon'],
-                'country' => $data['country']
+                'country' => $data['country'],
+                'postalCode' => $query 
             ]];
         }
-    
+
         return $this->makeRequest('/geo/1.0/direct', [
             'q' => $query,
             'limit' => 5
