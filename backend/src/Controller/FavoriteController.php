@@ -51,6 +51,7 @@ class FavoriteController extends AbstractController
                     new OA\Property(property: 'showUV', type: 'boolean'),
                     new OA\Property(property: 'showSunCycle', type: 'boolean'),
                     new OA\Property(property: 'showVisibility', type: 'boolean'),
+                    new OA\Property(property: 'gridLayout', type: 'array'),
                 ]
             )
         ),
@@ -81,6 +82,7 @@ class FavoriteController extends AbstractController
         $favorite->setShowUV($data['showUV'] ?? false);
         $favorite->setShowSunCycle($data['showSunCycle'] ?? false);
         $favorite->setShowVisibility($data['showVisibility'] ?? false);
+        $favorite->setGridLayout($data['gridLayout'] ?? null);
 
         $em->persist($favorite);
         $em->flush();
@@ -105,6 +107,7 @@ class FavoriteController extends AbstractController
                     new OA\Property(property: 'showUV', type: 'boolean'),
                     new OA\Property(property: 'showSunCycle', type: 'boolean'),
                     new OA\Property(property: 'showVisibility', type: 'boolean'),
+                    new OA\Property(property: 'gridLayout', type: 'array'),
                 ]
             )
         ),
@@ -127,6 +130,7 @@ class FavoriteController extends AbstractController
         $favorite->setShowUV($data['showUV'] ?? $favorite->isShowUV());
         $favorite->setShowSunCycle($data['showSunCycle'] ?? $favorite->isShowSunCycle());
         $favorite->setShowVisibility($data['showVisibility'] ?? $favorite->isShowVisibility());
+        $favorite->setGridLayout($data['gridLayout'] ?? $favorite->getGridLayout());
 
         $em->flush();
 

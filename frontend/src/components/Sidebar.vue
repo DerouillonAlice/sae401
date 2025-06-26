@@ -331,15 +331,18 @@ function onReorderEnd() {
         v-if="searchResults.length"
         class="bg-white border rounded-xl shadow-inner max-h-40 overflow-y-auto mb-4"
       >
-              <li
-                v-for="city in searchResults"
-                :key="city.id"
-                @click="selectCity(city)"
-                class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition rounded"
-              >
-                {{ city.name }} <span v-if="city.country">({{ city.country }})</span>
-              </li>
-            </ul>
+
+        <li
+          v-for="city in searchResults"
+          :key="city.id"
+          @click="selectCity(city)"
+          class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition rounded"
+        >
+          {{ city.name }}
+          <span v-if="city.postalCode" class="text-sm text-gray-500"> ({{ city.postalCode }})</span>
+          <span v-if="city.country" class="text-sm text-gray-500"> ({{ city.country }})</span>
+        </li>
+      </ul>
 
             <div class="flex gap-2 justify-end">
               <button
