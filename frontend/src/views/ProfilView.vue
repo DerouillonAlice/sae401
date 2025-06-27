@@ -60,30 +60,35 @@
       </div>
     </div>
 
-    <!-- Carte mot de passe existante -->
-    <div class="p-6 rounded-2xl max-w-4xl bg-white/60 backdrop-blur-md border shadow text-black">
-      <h2 class="text-3xl font-bold mb-6 text-center">Modifier le mot de passe</h2>
 
-      <form @submit.prevent="changePassword" class="space-y-4">
-        <div>
-          <label class="font-semibold">Ancien mot de passe</label>
-          <input v-model="oldPassword" type="password"
-            class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-            required />
-        </div>
-        <div>
-          <label class="font-semibold">Nouveau mot de passe</label>
-          <input v-model="newPassword" type="password"
-            class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-            required />
-        </div>
-        <button type="submit" class="w-full bg-black text-white py-2 rounded-xl font-bold hover:bg-gray-800 transition">
-          Modifier le mot de passe
-        </button>
-        <div v-if="passwordError" class="text-red-600 text-xs text-center bg-red-50 p-2 rounded">{{ passwordError }}</div>
-        <div v-if="passwordSuccess" class="text-green-600 text-xs text-center bg-green-50 p-2 rounded">{{ passwordSuccess }}</div>
-      </form>
-    </div>
+    <div class="flex flex-col gap-6">
+      <div class="p-6 rounded-2xl max-w-4xl bg-white/60 backdrop-blur-md border shadow text-black">
+        <h2 class="text-3xl font-bold mb-6 text-center">Modifier le mot de passe</h2>
+
+        <form @submit.prevent="changePassword" class="space-y-4">
+          <div>
+            <label class="font-semibold">Ancien mot de passe</label>
+            <input v-model="oldPassword" type="password"
+              class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              required />
+          </div>
+          <div>
+            <label class="font-semibold">Nouveau mot de passe</label>
+            <input v-model="newPassword" type="password"
+              class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              required />
+          </div>
+          <button type="submit"
+            class="w-full bg-black text-white py-2 rounded-xl font-bold hover:bg-gray-800 transition">
+            Modifier le mot de passe
+          </button>
+          <div v-if="passwordError" class="text-red-600 text-xs text-center bg-red-50 p-2 rounded">{{ passwordError }}
+          </div>
+          <div v-if="passwordSuccess" class="text-green-600 text-xs text-center bg-green-50 p-2 rounded">{{
+            passwordSuccess }}</div>
+        </form>
+      </div>
+    
 
     <div class="p-6 rounded-2xl max-w-4xl bg-white/60 backdrop-blur-md border shadow text-black">
       <h2 class="text-2xl font-bold mb-4 text-center">Alertes météo</h2>
@@ -103,48 +108,48 @@
         </div>
 
         <div>
-          <label class="font-semibold text-sm mb-2 block">Types d'événements</label>
-          <div class="grid grid-cols-3 gap-x-3 gap-y-2 text-xs">
-            <label v-for="type in alertTypes" :key="type.value"
-              class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
-              <input :checked="alertConfig.alertTypes.includes(type.value)" type="checkbox"
-                class="mr-2 h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                @change="toggleAlertType(type.value)" />
-              <span class="text-xs">{{ type.label }}</span>
-            </label>
-          </div>
+          <label class="font-semibold">Types d'événements</label>
+          <MultiSelect v-model="alertConfig.alertTypes" :options="alertTypes"
+            placeholder="Sélectionnez les types d'événements..." />
         </div>
 
         <div>
-          <label class="font-semibold text-sm mb-2 block">Villes surveillées</label>
-          <div v-if="userFavorites.length > 0" class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-            <label v-for="favorite in userFavorites" :key="favorite.id"
-              class="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded">
-              <input :checked="alertConfig.locations.includes(favorite.city)" type="checkbox"
-                class="mr-2 h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                @change="toggleFavoriteLocation(favorite.city)" />
-              <span class="truncate">{{ favorite.city }}</span>
-            </label>
-          </div>
-          <div v-else class="text-xs text-gray-500 italic bg-gray-50 p-2 rounded">
-            Ajoutez des favoris pour les surveiller
+          <label class="font-semibold">Villes surveillées</label>
+          <MultiSelect v-if="userFavorites.length > 0" v-model="alertConfig.locations" :options="userFavorites"
+            placeholder="Sélectionnez les villes à surveiller..." />
+          <div v-else class="text-sm text-gray-500 italic bg-gray-50 p-3 rounded-xl mt-1">
+            Aucune ville favorite. Ajoutez des favoris pour configurer les alertes.
           </div>
         </div>
 
-        <button @click="saveAlertConfig" :disabled="alertLoading"
-          class="w-full bg-black text-white py-2 px-4 rounded-xl text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-50 mt-4">
-          {{ alertLoading ? 'Sauvegarde...' : 'Sauvegarder' }}
-        </button>
+        <div class="flex gap-2">
+          <button @click="saveAlertConfig" :disabled="alertLoading"
+            class="flex-1 bg-black text-white py-2 rounded-xl font-bold hover:bg-gray-800 transition disabled:opacity-50">
+            {{ alertLoading ? 'Sauvegarde...' : 'Sauvegarder' }}
+          </button>
 
-        <div v-if="alertSuccess" class="text-green-600 text-xs text-center bg-green-50 p-2 rounded">{{ alertSuccess }}</div>
+          <button @click="handleTestAlert" :disabled="alertLoading"
+            class="px-4 bg-blue-600 text-white py-2 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50"
+            title="Tester le système d'alertes">
+            🧪
+          </button>
+        </div>
+
+        <div v-if="alertSuccess" class="text-green-600 text-xs text-center bg-green-50 p-2 rounded">{{ alertSuccess }}
+        </div>
         <div v-if="alertError" class="text-red-600 text-xs text-center bg-red-50 p-2 rounded">{{ alertError }}</div>
       </div>
     </div>
   </div>
+  </div>
+
+  <AlertDisplay ref="alertDisplay" />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import AlertDisplay from '../components/AlertDisplay.vue'
+import MultiSelect from '../components/MultiSelect.vue'
 import {
   getProfile,
   updateProfile as apiUpdateProfile,
@@ -160,6 +165,7 @@ const oldPassword = ref('')
 const newPassword = ref('')
 const passwordError = ref('')
 const passwordSuccess = ref('')
+const alertDisplay = ref(null)
 
 const {
   alertConfig,
@@ -169,9 +175,8 @@ const {
   userFavorites,
   alertTypes,
   saveAlertConfig,
-  toggleAlertType,
-  toggleFavoriteLocation,
-  initAlerts
+  initAlerts,
+  testAlertSystem
 } = useAlert()
 
 onMounted(async () => {
@@ -220,6 +225,13 @@ const changePassword = async () => {
     console.error('Erreur lors de la modification du mot de passe :', e)
     passwordError.value = e.response?.data?.message || "Impossible de modifier le mot de passe"
     setTimeout(() => { passwordError.value = '' }, 3000)
+  }
+}
+
+const handleTestAlert = async () => {
+  const testAlert = await testAlertSystem()
+  if (testAlert && alertDisplay.value) {
+    alertDisplay.value.addAlert(testAlert)
   }
 }
 </script>
