@@ -30,7 +30,7 @@
 
         <ul
           v-if="searchResults.length"
-          class="absolute left-0 right-0 mt-2 bg-white/90 backdrop-blur-md shadow-lg rounded-lg border border-gray-300 z-10 max-h-40 overflow-y-auto"
+          class="absolute left-0 right-0 mt-2 bg-white/90 backdrop-blur-md shadow-lg rounded-xl border border-gray-300 z-10 max-h-40 overflow-y-auto"
         >
           <li
             v-for="(result, index) in searchResults"

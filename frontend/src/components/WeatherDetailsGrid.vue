@@ -3,14 +3,12 @@
     <div class="flex flex-1 overflow-hidden">
       <main class="flex-1 overflow-auto sm:overflow-clip">
         <div class="w-full flex flex-col gap-4 mx-auto">
-          <!-- Configuration des blocs pour utilisateurs connectés -->
           <BlockSelector 
             v-if="auth.isConnected"
             v-model:blocks="allBlocks"
           />
 
           <div class="flex flex-col lg:flex-row gap-4 items-stretch">
-            <!-- Carte météo principale -->
             <WeatherMainCard
               :current-day-data="currentDayData"
               :day-forecast-data="dayForecastData"
@@ -21,7 +19,6 @@
               @get-date-info="getDateInfo"
             />
 
-            <!-- Grille personnalisable pour utilisateurs connectés -->
             <WeatherGrid
               v-if="auth.isConnected && layout.length > 0"
               v-model:layout="layout"
@@ -35,7 +32,6 @@
               @update-layout="updateLayout"
             />
 
-            <!-- Blocs par défaut pour utilisateurs non connectés OU connectés sans layout -->
             <DefaultWeatherBlocks
               v-else
               :all-blocks="allBlocks"
@@ -79,7 +75,6 @@ const auth = useAuthStore()
 
 const selectedDayIndex = ref(props.selectedDayIndex)
 
-// Utilisation des composables
 const {
   weatherData,
   forecastData,
@@ -99,7 +94,6 @@ const {
   loadFavoriteConfig
 } = useWeatherLayout(route, auth, weatherData, forecastData)
 
-// Données calculées
 const currentDayData = computed(() => {
   if (selectedDayIndex.value === 0) {
     return weatherData.value
@@ -138,7 +132,6 @@ const dayForecastData = computed(() => {
 
 const { imageUrl } = useWeatherImage(currentDayData)
 
-// Méthodes
 const goToRegister = () => {
   router.push({ path: '/inscription' })
 }
@@ -163,7 +156,6 @@ function getDateInfo() {
   }
 }
 
-// Watchers et lifecycle
 watch(() => props.selectedDayIndex, (newIndex) => {
   selectedDayIndex.value = newIndex
 })
