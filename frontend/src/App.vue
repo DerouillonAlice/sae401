@@ -169,8 +169,8 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
         </Swiper>
       </div>
 
-      <main class="flex-1 overflow-y-auto md:p-6">
-        <router-view class="h-full" />
+      <main class="flex-1 content-center overflow-y-auto md:p-6">
+        <router-view class="" />
       </main>
       <Footer class="pb-6 pt-4 mx-8" />
     </div>
