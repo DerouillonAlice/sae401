@@ -267,10 +267,12 @@ function onReorderEnd() {
                   </template>
                 </CityCard>
               </template>
-              <a href="/connexion" >
-                <CityCard v-if="!auth.isConnected" name="Connectez-vous pour ajouter vos favoris" imageSrc=""
-                  isPlaceholder customClass="connect-card" />
-              </a>
+              <div class="mt-4 border-t border-gray-300">
+                <a href="/connexion">
+                  <CityCard v-if="!auth.isConnected" name="Connectez-vous pour ajouter vos favoris" imageSrc=""
+                    isPlaceholder customClass="connect-card" />
+                </a>
+              </div>
               <CityCard v-if="auth.isConnected && !hasReachedFavoriteLimit" name="Ajouter une ville à vos favoris"
                 isPlaceholder customClass="connect-card" @click="openAddFavoriteModal" />
             </TransitionGroup>
