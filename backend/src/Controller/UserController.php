@@ -309,4 +309,34 @@ class UserController extends AbstractController
             ]
         ]);
     }
+
+    #[Route('/alert-config/test', name: 'user_alert_test', methods: ['POST'])]
+    public function testAlert(): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        // Créer une alerte de test
+        $testAlert = [
+            'id' => uniqid(),
+            'type' => 'thunderstorm',
+            'severity' => 'severe',
+            'location' => 'Paris',
+            'title' => '⚠️ ALERTE TEST',
+            'message' => 'Orages sévères simulés détectés à Paris',
+            'timestamp' => (new \DateTime())->format('Y-m-d H:i:s'),
+            'isTest' => true
+        ];
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Alerte de test générée',
+            'alert' => $testAlert,
+            'userConfig' => [
+                'enabled' => $user->getAlertEnabled(),
+                'types' => $user->getAlertTypes(),
+                'severity' => $user->getAlertSeverity(),
+                'locations' => $user->getAlertLocations()
+            ]
+        ]);
+    }
 }

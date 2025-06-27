@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { getAlertConfig, updateAlertConfig, fetchFavorites } from '../services/services'
+import { getAlertConfig, updateAlertConfig, fetchFavorites, testAlert } from '../services/services'
 
 export function useAlert() {
   const alertConfig = ref({
@@ -110,6 +110,29 @@ export function useAlert() {
     ])
   }
 
+  const testAlertSystem = async () => {
+    alertLoading.value = true
+    alertError.value = ''
+    alertSuccess.value = ''
+
+    try {
+      const response = await testAlert()
+      if (response.success) {
+        alertSuccess.value = `✅ Test réussi ! Alerte simulée générée`
+        setTimeout(() => { alertSuccess.value = '' }, 5000)
+        
+        // Retourner l'alerte pour l'affichage
+        return response.data.alert
+      }
+    } catch (e) {
+      console.error('Erreur lors du test:', e)
+      alertError.value = 'Erreur lors du test des alertes'
+      setTimeout(() => { alertError.value = '' }, 3000)
+    } finally {
+      alertLoading.value = false
+    }
+  }
+
   return {
     alertConfig,
     alertLoading,
@@ -123,6 +146,7 @@ export function useAlert() {
     saveAlertConfig,
     toggleAlertType,
     toggleFavoriteLocation,
-    initAlerts
+    initAlerts,
+    testAlertSystem
   }
 }

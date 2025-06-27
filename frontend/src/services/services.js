@@ -186,3 +186,16 @@ export const updateAlertConfig = async (config) => {
     return handleError(error)
   }
 }
+
+export const testAlert = async () => {
+  try {
+    const res = await axios.post('/api/user/alert-config/test', {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
+}
