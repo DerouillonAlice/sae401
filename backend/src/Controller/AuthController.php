@@ -128,20 +128,24 @@ class AuthController extends AbstractController
                 'error' => 'Une demande a déjà été envoyée récemment. Veuillez vérifier votre boîte mail ou réessayer plus tard.'
             ], 429);
         }
-
-        // URL vers le front Vue avec le token en query
         $frontendUrl = $_ENV['FRONTEND_URL'] ?? 'http://localhost:5173';
         $resetUrl = $frontendUrl . '/reset-password?token=' . $resetToken->getToken();
         
 
-        // Création et envoi de l'e-mail
         $emailMessage = (new Email())
-            ->from('no-reply@tonsite.com') // à modifier avec ton domaine
+            ->from('no-reply@tonsite.com')
             ->to($user->getEmail())
             ->subject('Réinitialisation de votre mot de passe')
             ->text("Bonjour,\n\nPour réinitialiser votre mot de passe, cliquez sur le lien suivant :\n$resetUrl\n\nCe lien expirera dans une heure.");
 
-        $mailer->send($emailMessage);
+            try {
+                $mailer->send($emailMessage);
+            } catch (\Throwable $e) {
+                return new JsonResponse([
+                    'error' => 'Erreur lors de l\'envoi du mail : ' . $e->getMessage()
+                ], 500);
+            }
+            
 
         return new JsonResponse([
             'message' => 'Un email a été envoyé pour réinitialiser votre mot de passe.'
