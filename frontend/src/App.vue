@@ -117,10 +117,16 @@ const openAddFavoriteModal = inject('openAddFavoriteModal', () => {})
 
 <template>
   <div id="app" class="min-h-screen w-full flex bg-cover bg-center" :style="{ backgroundImage: `url('${fond}')` }">
-    <Sidebar class="transition-all duration-300 h-screen flex-shrink-0 hidden md:block"
-      :class="isSidebarOpen ? 'w-64' : 'w-12'" />
+    <Sidebar class="hidden md:block" />
 
-    <div class="flex flex-col flex-1 min-h-screen w-full">
+    <div 
+      class="flex flex-col flex-1 min-h-screen w-full transition-all duration-300"
+      :class="{
+        'md:ml-64': isSidebarOpen,
+        'md:ml-12': !isSidebarOpen
+      }"
+    >
+
       <Navbar />
 
       <div v-if="isHomeView" class="md:hidden flex flex-col items-center justify-center">
