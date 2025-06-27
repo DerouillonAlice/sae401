@@ -1,8 +1,8 @@
 <template>
   <div
     :class="[
-      'relative rounded-xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
-      isConnected && hasLayout ? 'flex-1' : isConnected ? 'w-full' : 'w-full lg:max-w-md'
+      'relative  rounded-xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
+      isConnected && hasLayout ? 'flex-1' : isConnected ? 'w-full m-2' : 'w-full lg:max-w-md'
     ]"
   >
     <img 

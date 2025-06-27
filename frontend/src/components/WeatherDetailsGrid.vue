@@ -2,7 +2,7 @@
   <div class="flex flex-col">
     <div class="flex flex-1 overflow-hidden">
       <main class="flex-1 overflow-auto sm:overflow-clip">
-        <div class="w-full flex flex-col gap-4 mx-auto">
+        <div class="w-full flex flex-col mx-auto">
           <BlockSelector 
             v-if="auth.isConnected"
             v-model:blocks="allBlocks"
