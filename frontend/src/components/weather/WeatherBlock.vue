@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full flex flex-col items-center justify-center rounded-lg shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2">
+  <div class="h-full w-full flex flex-col items-center justify-center rounded-xl shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2">
     <component :is="getIconComponent(name)" class="w-10 h-10 text-black" />
     <div>
       {{ getBlockContent(name) }}

@@ -1,5 +1,5 @@
 <template>
-  <section class="flex items-center justify-between w-full h-16 bg-white/40 backdrop-blur-md rounded-md shadow overflow-hidden border border-white/70 px-4">
+  <section class="flex items-center justify-between w-full h-16 bg-white/40 backdrop-blur-md rounded-xl shadow overflow-hidden border border-white/70 px-4">
     <h1 class="text-2xl font-bold">{{ villeAffichee }}</h1>
     <div class="flex items-center gap-2">
       <span v-if="errorMsg" class="text-red-600 text-sm mr-2">{{ errorMsg }}</span>

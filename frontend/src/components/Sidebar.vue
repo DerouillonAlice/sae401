@@ -267,10 +267,12 @@ function onReorderEnd() {
                   </template>
                 </CityCard>
               </template>
-              <a href="/connexion">
-                <CityCard v-if="!auth.isConnected" name="Connectez-vous pour ajouter vos favoris" imageSrc=""
-                  isPlaceholder customClass="connect-card" />
-              </a>
+              <div class="mt-4 border-t border-gray-300">
+                <a href="/connexion">
+                  <CityCard v-if="!auth.isConnected" name="Connectez-vous pour ajouter vos favoris" imageSrc=""
+                    isPlaceholder customClass="connect-card" />
+                </a>
+              </div>
               <CityCard v-if="auth.isConnected && !hasReachedFavoriteLimit" name="Ajouter une ville à vos favoris"
                 isPlaceholder customClass="connect-card" @click="openAddFavoriteModal" />
             </TransitionGroup>
@@ -289,9 +291,9 @@ function onReorderEnd() {
 
     <transition name="fade">
       <div v-if="showAddFavorite" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class=" backdrop-blur-lg bg-white/40 rounded-2xl shadow-xl  w-full max-w-sm text-gray-800"
+        <div class=" backdrop-blur-lg bg-white/40 rounded-xl shadow-xl  w-full max-w-sm text-gray-800"
           :style="{ backgroundImage: `url('${fond}')` }">
-          <div class="overlay bg-white/50  inset-0 w-full h-full rounded-2xl p-6">
+          <div class="overlay bg-white/50  inset-0 w-full h-full rounded-xl p-6">
 
             <h3 class="text-xl font-semibold mb-4 text-center">Ajouter une ville à vos favoris</h3>
 

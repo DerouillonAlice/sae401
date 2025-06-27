@@ -1,8 +1,8 @@
 <template>
   <div
     :class="[
-      'relative rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
-      isConnected && hasLayout ? 'flex-1' : isConnected ? 'w-full' : 'w-full lg:max-w-md'
+      'relative  rounded-xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
+      isConnected && hasLayout ? 'flex-1' : isConnected ? 'w-full m-2' : 'w-full lg:max-w-md'
     ]"
   >
     <img 
@@ -31,7 +31,7 @@
       <div 
         v-for="(entry, index) in dayForecastData" 
         :key="index"
-        class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-2xl last:rounded-r-2xl text-center py-4 px-2"
+        class="flex-1 bg-white/70 backdrop-blur-md border border-gray-200 first:rounded-l-xl last:rounded-r-xl text-center py-4 px-2"
       >
         <div class="text-sm font-bold">{{ entry.label }}</div>
         <img 

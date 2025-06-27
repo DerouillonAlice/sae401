@@ -28,7 +28,7 @@ const dynamicDays = computed(() => {
 </script>
 
 <template>
-  <section class="flex w-full h-fit bg-white/40 backdrop-blur-md rounded-md shadow overflow-hidden border border-white/70">
+  <section class="flex w-full h-fit bg-white/40 backdrop-blur-md rounded-xl shadow overflow-hidden border border-white/70">
     <button
       v-for="(day, index) in dynamicDays"
       :key="index"

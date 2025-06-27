@@ -31,7 +31,7 @@ const submitLogin = async (e) => {
 <template>
   <div class="flex justify-center items-center flex-1 mx-4 md:mx-0">
     <form
-      class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-md"
+      class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-4xl"
       @submit="submitLogin"
     >
       <h2 class="text-2xl font-bold mb-6 text-center">Connexion</h2>

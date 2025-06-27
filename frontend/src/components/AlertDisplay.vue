@@ -4,7 +4,7 @@
       v-for="alert in alerts" 
       :key="alert.id"
       :class="getAlertClass(alert.severity)"
-      class="max-w-sm p-4 rounded-lg shadow-lg border-l-4"
+      class="max-w-sm p-4 rounded-xl shadow-lg border-l-4"
     >
       <div class="flex items-start">
         <div class="flex-shrink-0">
