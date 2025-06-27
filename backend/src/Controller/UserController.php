@@ -132,4 +132,181 @@ class UserController extends AbstractController
 
         return $this->json(['message' => 'Mot de passe mis à jour avec succès.']);
     }
+
+    #[OA\Get(
+        path: '/user/alert-config',
+        summary: 'Consulter la configuration des alertes météo',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Configuration des alertes météo de l\'utilisateur',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'enabled', type: 'boolean', description: 'Alertes activées ou non'),
+                        new OA\Property(
+                            property: 'alertTypes', 
+                            type: 'array', 
+                            items: new OA\Items(
+                                type: 'string',
+                                enum: ['thunderstorm', 'tornado', 'hurricane', 'wind', 'rain', 'flood', 'snow', 'ice', 'fog', 'heat', 'cold']
+                            ),
+                            description: 'Types d\'événements météo à surveiller'
+                        ),
+                        new OA\Property(
+                            property: 'severity', 
+                            type: 'string', 
+                            enum: ['minor', 'moderate', 'severe', 'extreme'],
+                            description: 'Niveau de gravité minimum pour déclencher une alerte'
+                        ),
+                        new OA\Property(
+                            property: 'locations', 
+                            type: 'array', 
+                            items: new OA\Items(type: 'string'),
+                            description: 'Liste des villes ou régions à surveiller'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Non authentifié')
+        ]
+    )]
+    #[Route('/alert-config', name: 'user_alert_config', methods: ['GET'])]
+    public function getAlertConfig(): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        return $this->json([
+            'enabled' => $user->getAlertEnabled(),
+            'alertTypes' => $user->getAlertTypes() ?? [],
+            'severity' => $user->getAlertSeverity(),
+            'locations' => $user->getAlertLocations() ?? []
+        ]);
+    }
+
+    #[OA\Put(
+        path: '/user/alert-config',
+        summary: 'Configurer les alertes météo',
+        description: 'Permet de configurer les types d\'alertes météo, le niveau de gravité minimum et les zones géographiques à surveiller',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: 'Configuration des alertes météo',
+            content: new OA\JsonContent(
+                type: 'object',
+                required: ['enabled'],
+                properties: [
+                    new OA\Property(
+                        property: 'enabled', 
+                        type: 'boolean',
+                        description: 'Activer ou désactiver les alertes météo',
+                        example: true
+                    ),
+                    new OA\Property(
+                        property: 'alertTypes', 
+                        type: 'array', 
+                        items: new OA\Items(
+                            type: 'string',
+                            enum: ['thunderstorm', 'tornado', 'hurricane', 'wind', 'rain', 'flood', 'snow', 'ice', 'fog', 'heat', 'cold']
+                        ),
+                        description: 'Types d\'événements météo à surveiller',
+                        example: ['thunderstorm', 'wind', 'snow']
+                    ),
+                    new OA\Property(
+                        property: 'severity', 
+                        type: 'string', 
+                        enum: ['minor', 'moderate', 'severe', 'extreme'],
+                        description: 'Niveau de gravité minimum (minor < moderate < severe < extreme)',
+                        example: 'moderate'
+                    ),
+                    new OA\Property(
+                        property: 'locations', 
+                        type: 'array', 
+                        items: new OA\Items(type: 'string'),
+                        description: 'Liste des villes ou régions à surveiller',
+                        example: ['Paris', 'Lyon', 'Marseille']
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: 'Configuration des alertes mise à jour avec succès',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'Configuration des alertes mise à jour'),
+                        new OA\Property(
+                            property: 'config',
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'enabled', type: 'boolean'),
+                                new OA\Property(property: 'alertTypes', type: 'array', items: new OA\Items(type: 'string')),
+                                new OA\Property(property: 'severity', type: 'string'),
+                                new OA\Property(property: 'locations', type: 'array', items: new OA\Items(type: 'string'))
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400, 
+                description: 'Données de configuration invalides',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Types d\'alertes invalides: invalidType')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Non authentifié')
+        ]
+    )]
+    #[Route('/alert-config', name: 'user_alert_config_update', methods: ['PUT'])]
+    public function updateAlertConfig(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true);
+
+        // Validation des types d'alertes
+        $validAlertTypes = ['thunderstorm', 'tornado', 'hurricane', 'wind', 'rain', 'flood', 'snow', 'ice', 'fog', 'heat', 'cold'];
+        $validSeverities = ['minor', 'moderate', 'severe', 'extreme'];
+
+        if (isset($data['enabled'])) {
+            $user->setAlertEnabled($data['enabled']);
+        }
+
+        if (isset($data['alertTypes'])) {
+            $invalidTypes = array_diff($data['alertTypes'], $validAlertTypes);
+            if (!empty($invalidTypes)) {
+                return $this->json(['error' => 'Types d\'alertes invalides: ' . implode(', ', $invalidTypes)], 400);
+            }
+            $user->setAlertTypes($data['alertTypes']);
+        }
+
+        if (isset($data['severity'])) {
+            if (!in_array($data['severity'], $validSeverities)) {
+                return $this->json(['error' => 'Niveau de gravité invalide'], 400);
+            }
+            $user->setAlertSeverity($data['severity']);
+        }
+
+        if (isset($data['locations'])) {
+            $user->setAlertLocations($data['locations']);
+        }
+
+        $em->flush();
+
+        return $this->json([
+            'message' => 'Configuration des alertes mise à jour',
+            'config' => [
+                'enabled' => $user->getAlertEnabled(),
+                'alertTypes' => $user->getAlertTypes(),
+                'severity' => $user->getAlertSeverity(),
+                'locations' => $user->getAlertLocations()
+            ]
+        ]);
+    }
 }
