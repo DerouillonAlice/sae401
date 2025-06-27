@@ -51,7 +51,11 @@ class FavoriteController extends AbstractController
                     new OA\Property(property: 'showUV', type: 'boolean'),
                     new OA\Property(property: 'showSunCycle', type: 'boolean'),
                     new OA\Property(property: 'showVisibility', type: 'boolean'),
-                    new OA\Property(property: 'gridLayout', type: 'array'),
+                    new OA\Property(
+                        property: 'gridLayout', 
+                        type: 'array',
+                        items: new OA\Items(type: 'object')
+                    ),
                 ]
             )
         ),
@@ -107,7 +111,11 @@ class FavoriteController extends AbstractController
                     new OA\Property(property: 'showUV', type: 'boolean'),
                     new OA\Property(property: 'showSunCycle', type: 'boolean'),
                     new OA\Property(property: 'showVisibility', type: 'boolean'),
-                    new OA\Property(property: 'gridLayout', type: 'array'),
+                    new OA\Property(
+                        property: 'gridLayout', 
+                        type: 'array',
+                        items: new OA\Items(type: 'object')
+                    ),
                 ]
             )
         ),

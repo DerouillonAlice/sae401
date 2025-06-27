@@ -63,7 +63,11 @@ export const removeFavorite = async (city) => {
 
 export const fetchFavorites = async () => {
   try {
-    const res = await axios.get('/api/favorites')
+    const res = await axios.get('/api/favorites', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
     return { success: true, data: res.data }
   } catch (error) {
     return handleError(error)
@@ -153,4 +157,45 @@ export const updateFavoriteConfig = (favoriteId, config) => {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     }
   })
+}
+
+
+
+export const getAlertConfig = async () => {
+  try {
+    const res = await axios.get('/api/user/alert-config', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+export const updateAlertConfig = async (config) => {
+  try {
+    const res = await axios.put('/api/user/alert-config', config, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+export const testAlert = async () => {
+  try {
+    const res = await axios.post('/api/user/alert-config/test', {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
 }
