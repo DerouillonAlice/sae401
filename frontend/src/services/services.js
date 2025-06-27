@@ -73,3 +73,10 @@ export const updateFavoriteConfig = (favoriteId, config) => {
     }
   })
 }
+export const requestResetPassword = (email) => {
+  return axios.post('/api/request-reset-password', { email })
+}
+
+export const resetPassword = (token, newPassword) => {
+  return axios.post('/api/reset-password', { token, newPassword })
+}
