@@ -27,7 +27,7 @@
       {{ selectedDayIndex === 0 ? 'Dernière mise à jour' : 'Prévisions pour' }} : {{ getDateInfoText() }}
     </div>
 
-    <div class="flex w-full mt-6 z-10 relative">
+    <div v-if="selectedDayIndex === 0" class="flex w-full mt-6 z-10 relative">
       <div 
         v-for="(entry, index) in dayForecastData" 
         :key="index"

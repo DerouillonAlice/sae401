@@ -1,11 +1,9 @@
 import axios from 'axios'
 
 // Configuration directe sans variable d'environnement
-axios.defaults.baseURL = '' // Laissez vide si l'API est sur le même domaine
-// OU spécifiez l'URL complète :
-// axios.defaults.baseURL = 'http://localhost:8000'
+axios.defaults.baseURL = ''
 
-// Intercepteur pour ajouter automatiquement le token
+// Intercepteurs...
 axios.interceptors.request.use((config) => {
   const publicRoutes = [
     '/api/contact',
@@ -27,13 +25,10 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
-
-// Intercepteur pour gérer les erreurs de validation Symfony
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 422 && error.response.data.violations) {
-      // Erreurs de validation Symfony
       const violations = error.response.data.violations
       const errors = violations.map(v => v.message).join(', ')
       
@@ -90,7 +85,9 @@ const handleError = (error) => {
   }
 }
 
-// Services Weather
+// ========================================
+// SERVICES WEATHER
+// ========================================
 export const getWeatherByCity = async (city) => {
   try {
     const res = await axios.get(`/api/weather/${encodeURIComponent(city)}`)
@@ -118,7 +115,9 @@ export const searchCities = async (query) => {
   }
 }
 
-// Services Auth
+// ========================================
+// SERVICES AUTH
+// ========================================
 export const login = async (email, password) => {
   try {
     const res = await axios.post('/api/login_check', {
@@ -144,7 +143,9 @@ export const register = async (firstname, email, password) => {
   }
 }
 
-// Services User
+// ========================================
+// SERVICES USER
+// ========================================
 export const getProfile = async () => {
   try {
     const res = await axios.get('/api/user/profile')
@@ -175,7 +176,27 @@ export const changePassword = async (oldPassword, newPassword) => {
   }
 }
 
-// Services Favorites
+export const requestResetPassword = async (email) => {
+  try {
+    const res = await axios.post('/api/request-reset-password', { email })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+export const resetPassword = async (token, newPassword) => {
+  try {
+    const res = await axios.post('/api/reset-password', { token, newPassword })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
+// ========================================
+// SERVICES FAVORITES
+// ========================================
 export const fetchFavorites = async () => {
   try {
     const res = await axios.get('/api/favorites')
@@ -194,17 +215,7 @@ export const addFavorite = async (city) => {
   }
 }
 
-
-export const requestResetPassword = (email) => {
-  return axios.post('/api/request-reset-password', { email })
-}
-
-export const resetPassword = (token, newPassword) => {
-  return axios.post('/api/reset-password', { token, newPassword })
-
-}
-
-  export const removeFavorite = async (city) => {
+export const removeFavorite = async (city) => {
   try {
     const res = await axios.delete(`/api/favorites/${encodeURIComponent(city)}`)
     return { success: true, data: res.data }
@@ -222,7 +233,9 @@ export const updateFavoriteConfig = async (favoriteId, config) => {
   }
 }
 
-// Services Alerts
+// ========================================
+// SERVICES ALERTS
+// ========================================
 export const getAlertConfig = async () => {
   try {
     const res = await axios.get('/api/user/alert-config')

@@ -64,7 +64,7 @@ export function useWeatherLayout(route, auth) {
 
   function updateColNum() {
     const width = window.innerWidth
-    colNum.value = width < 640 ? 1 : 3
+    colNum.value = width < 1024 ? 1 : 3
   }
 
   function updateContainerWidth() {
@@ -73,7 +73,7 @@ export function useWeatherLayout(route, auth) {
 
   function generateDefaultLayout() {
     const activeBlocks = allBlocks.value.filter((b) => b.active)
-    const isMobile = window.innerWidth < 640
+    const isMobile = window.innerWidth < 1024
 
     if (activeBlocks.length === 0) {
       layout.value = []
@@ -104,7 +104,7 @@ export function useWeatherLayout(route, auth) {
     clearTimeout(updateTimeout)
 
     updateTimeout = setTimeout(() => {
-      const isMobile = window.innerWidth < 640
+      const isMobile = window.innerWidth < 1024
 
       if (isMobile) {
         const sortedLayout = newLayout.slice().sort((a, b) => a.y - b.y)
@@ -138,7 +138,6 @@ export function useWeatherLayout(route, auth) {
       )
       
       if (currentFavorite.value) {
-        // Ville dans les favoris : charger la configuration sauvegardée
         allBlocks.value.forEach(block => {
           switch(block.name) {
             case 'Vent': block.active = currentFavorite.value.showWind; break
@@ -151,16 +150,20 @@ export function useWeatherLayout(route, auth) {
         })
         
         if (currentFavorite.value.gridLayout && currentFavorite.value.gridLayout.length > 0) {
-          layout.value = [...currentFavorite.value.gridLayout]
+          const isMobile = window.innerWidth < 1024
+          if (isMobile) {
+            generateDefaultLayout()
+          } else {
+            layout.value = [...currentFavorite.value.gridLayout]
+          }
         } else {
           generateDefaultLayout()
         }
       } else {
-        // Ville PAS dans les favoris : tous les blocs décochés par défaut
         allBlocks.value.forEach(block => {
           block.active = false
         })
-        layout.value = [] // Grille vide
+        layout.value = []
       }
       
       nextTick(() => {
@@ -169,7 +172,6 @@ export function useWeatherLayout(route, auth) {
         }, 200)
       })
     } else {
-      // Utilisateur non connecté : tous les blocs actifs
       allBlocks.value.forEach(block => {
         block.active = true
       })

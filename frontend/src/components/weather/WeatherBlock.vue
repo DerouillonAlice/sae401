@@ -22,7 +22,7 @@
       <!-- Affichage normal pour les autres blocs -->
       <div v-else>
         <div class="text-xl font-bold text-gray-800 mb-1">
-          {{ getValue() }}
+          {{ getValueOnly() }}
         </div>
         <div class="text-xs text-gray-600">
           {{ getUnit() }}
@@ -33,6 +33,9 @@
 </template>
 
 <script setup>
+import { useUnitFormatters } from '@/services/unitUtils'
+import { useAuthStore } from '@/stores/auth'
+
 const props = defineProps({
   name: {
     type: String,
@@ -56,6 +59,8 @@ const props = defineProps({
   }
 })
 
+const { formatTemperature, formatWind, formatPressure } = useUnitFormatters()
+
 function formatTime(timestamp) {
   if (!timestamp) return '—'
   const date = new Date(timestamp * 1000)
@@ -63,44 +68,80 @@ function formatTime(timestamp) {
 }
 
 function getSunriseTime() {
-  // Priorité aux données actuelles du jour, sinon données de la ville
   const sunrise = props.currentDayData?.sys?.sunrise || props.cityData?.sunrise
   return formatTime(sunrise)
 }
 
 function getSunsetTime() {
-  // Priorité aux données actuelles du jour, sinon données de la ville
   const sunset = props.currentDayData?.sys?.sunset || props.cityData?.sunset
   return formatTime(sunset)
 }
 
-function getValue() {
+// Fonction pour obtenir seulement la valeur (sans unité)
+function getValueOnly() {
   if (!props.currentDayData) return '—'
   
   switch (props.name) {
     case 'Vent':
-      return Math.round(props.currentDayData.wind?.speed * 3.6 || 0)
+      const windSpeed = props.currentDayData.wind?.speed || 0
+      const auth = useAuthStore()
+      return auth.user?.uniteVent === 'km/h' 
+        ? Math.round(windSpeed * 3.6) 
+        : Math.round(windSpeed)
     case 'Humidité':
-      return props.currentDayData.main?.humidity || 0
+      return (props.currentDayData.main?.humidity || 0)
     case 'Visibilité':
       return Math.round((props.currentDayData.visibility || 0) / 1000)
     case 'Nuages':
-      return props.currentDayData.clouds?.all || 0
+      return (props.currentDayData.clouds?.all || 0)
     case 'Pression':
-      return props.currentDayData.main?.pressure || 0
+      const pressure = props.currentDayData.main?.pressure || 0
+      const authStore = useAuthStore()
+      return authStore.user?.unitePression === 'mmHg' 
+        ? Math.round(pressure * 0.750062) 
+        : Math.round(pressure)
     default:
       return '—'
   }
 }
 
+// Fonction pour obtenir seulement l'unité
 function getUnit() {
+  const auth = useAuthStore()
+  
   switch (props.name) {
-    case 'Vent': return 'km/h'
-    case 'Humidité': return '%'
-    case 'Visibilité': return 'km'
-    case 'Nuages': return '% couverture'
-    case 'Pression': return 'hPa'
-    default: return ''
+    case 'Vent':
+      return auth.user?.uniteVent === 'km/h' ? 'km/h' : 'm/s'
+    case 'Humidité':
+      return '%'
+    case 'Visibilité':
+      return 'km'
+    case 'Nuages':
+      return '% couverture'
+    case 'Pression':
+      return auth.user?.unitePression === 'mmHg' ? 'mmHg' : 'hPa'
+    default:
+      return ''
+  }
+}
+
+// Garder l'ancienne fonction pour compatibilité
+function getValue() {
+  if (!props.currentDayData) return '—'
+  
+  switch (props.name) {
+    case 'Vent':
+      return formatWind.value(props.currentDayData.wind?.speed || 0)
+    case 'Humidité':
+      return (props.currentDayData.main?.humidity || 0) + '%'
+    case 'Visibilité':
+      return Math.round((props.currentDayData.visibility || 0) / 1000) + ' km'
+    case 'Nuages':
+      return (props.currentDayData.clouds?.all || 0) + '% couverture'
+    case 'Pression':
+      return formatPressure.value(props.currentDayData.main?.pressure || 0)
+    default:
+      return '—'
   }
 }
 </script>
