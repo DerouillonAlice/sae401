@@ -24,6 +24,7 @@
           type="button"
           class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent p-0 m-0"
           tabindex="-1"
+          aria-label="Rechercher une ville"
         >
           <MagnifyingGlassIcon class="w-5 h-5" />
         </button>
@@ -53,18 +54,22 @@
         v-if="auth.isConnected"
         @click="goToProfile"
         class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        aria-label="Aller au profil"
       >
         <UserIcon class="w-6 h-6" />
       </button>
+
       <button
         v-if="auth.isConnected"
         @click="logout"
         class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        aria-label="Se déconnecter"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
         </svg>
       </button>
+
       <template v-if="!auth.isConnected">
         <div class="hidden md:flex flex-row gap-2">
           <button @click="goToLogin"
