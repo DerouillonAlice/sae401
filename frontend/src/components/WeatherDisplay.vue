@@ -13,23 +13,22 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue'
-  import axios from 'axios'
-  
-  const city = ref('')
-  const weather = ref(null)
-  
-  async function loadWeather() {
-    try {
-      const res = await axios.get(`/api/weather/${encodeURIComponent(city.value)}`)
-      weather.value = res.data
-    } catch (err) {
-      alert('Error fetching weather')
-    }
+import { ref } from 'vue'
+import { getWeatherByCity } from '../services/services'
+
+const city = ref('')
+const weather = ref(null)
+
+async function loadWeather() {
+  try {
+    const res = await getWeatherByCity(city.value)
+    weather.value = res.data
+  } catch (err) {
+    alert('Error fetching weather')
   }
-  </script>
+}
+</script>
   
   <style scoped>
 
   </style>
-  

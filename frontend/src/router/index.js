@@ -26,12 +26,35 @@ const routes = [
     path: '/connexion',
     name: 'ConnexionView',
     component: () => import('@/views/ConnexionView.vue')
+  },
+
+  {
+    path :'/mentions-legales',
+    name: 'MentionsLegalesView',
+    component: () => import('@/views/MentionsLegalesView.vue')
+  },
+  { 
+    path: '/contact',
+    name: 'ContactView',
+    component: () => import('@/views/ContactView.vue')
+  },
+  {
+    path: '/mot-de-passe-oublie',
+    name: 'ForgotPassword',
+    component: () => import('@/views/ForgotPasswordView.vue')
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/ResetPasswordView.vue')
   }
+  
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
 
 export default router

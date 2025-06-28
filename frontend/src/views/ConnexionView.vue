@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { login } from '../services/services'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -17,10 +17,7 @@ const submitLogin = async (e) => {
   error.value = ''
   success.value = ''
   try {
-    const loginRes = await axios.post('/api/login_check', {
-      username: email.value,
-      password: password.value
-    })
+    const loginRes = await login(email.value, password.value)
     localStorage.setItem('token', loginRes.data.token)
     success.value = 'Connexion réussie !'
     await auth.checkAuth()
@@ -32,9 +29,9 @@ const submitLogin = async (e) => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center flex-1">
+  <div class="flex justify-center items-center flex-1 mx-4 md:mx-0">
     <form
-      class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-md"
+      class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-4xl"
       @submit="submitLogin"
     >
       <h2 class="text-2xl font-bold mb-6 text-center">Connexion</h2>
@@ -59,6 +56,13 @@ const submitLogin = async (e) => {
         <router-link to="/inscription" class="text-blue-600 hover:underline font-semibold">
           Inscrivez-vous
         </router-link>
+        <router-link
+          to="/mot-de-passe-oublie"
+          class="text-sm text-blue-600 hover:underline block mt-4 text-center"
+        >
+          Mot de passe oublié ?
+        </router-link>
+
       </div>
     </form>
   </div>

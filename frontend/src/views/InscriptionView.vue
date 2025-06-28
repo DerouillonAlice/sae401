@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import { register, login } from '../services/services'
 
 const auth = useAuthStore()
 
@@ -16,15 +16,8 @@ const submitRegister = async (e) => {
   error.value = ''
   success.value = ''
   try {
-    await axios.post('/api/register', {
-      firstname: firstname.value,
-      email: email.value,
-      password: password.value
-    })
-    const loginRes = await axios.post('/api/login_check', {
-      username: email.value,
-      password: password.value
-    })
+    await register(firstname.value, email.value, password.value)
+    const loginRes = await login(email.value, password.value)
     localStorage.setItem('token', loginRes.data.token)
     success.value = 'Inscription réussie !'
     await auth.checkAuth()
@@ -37,9 +30,9 @@ const submitRegister = async (e) => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center flex-1">
+  <div class="flex justify-center items-center flex-1 mx-4 md:mx-0">
     <form
-      class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-md"
+      class="bg-white/30 backdrop-blur-lg p-10 rounded-xl shadow-lg w-full max-w-4xl"
       @submit="submitRegister"
     >
       <h2 class="text-2xl font-bold mb-6 text-center">Créer un compte</h2>

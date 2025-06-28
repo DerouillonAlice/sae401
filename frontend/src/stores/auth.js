@@ -26,6 +26,21 @@ export const useAuthStore = defineStore('auth', {
         localStorage.removeItem('token')
       }
     },
+
+    async reorderFavorites(newOrder) {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) return
+    
+        await axios.post('/api/favorites/reorder', newOrder, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+    
+        await this.fetchFavorites()
+      } catch (error) {
+        console.error('Erreur lors du réordonnancement des favoris :', error)
+      }
+    },    
     
     async fetchFavorites() {
       try {
@@ -34,7 +49,7 @@ export const useAuthStore = defineStore('auth', {
         const res = await axios.get('/api/favorites', {
           headers: { Authorization: `Bearer ${token}` }
         })
-        this.favorites = res.data
+        this.favorites = [...res.data].sort((a, b) => a.position - b.position)
       } catch (error) {
         console.error('Erreur lors de la récupération des favoris :', error)
         this.favorites = []
@@ -46,13 +61,15 @@ export const useAuthStore = defineStore('auth', {
       try {
         const token = localStorage.getItem('token')
         if (!token) return
-        
+
+        const position = this.favorites.length
+
         await axios.post(
           '/api/favorites',
-          { city },
+          { city, position },
           { headers: { Authorization: `Bearer ${token}` } }
         )
-        
+
         await this.fetchFavorites()
       } catch (error) {
         console.error('Erreur lors de l\'ajout du favori :', error)

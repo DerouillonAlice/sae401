@@ -16,7 +16,7 @@ const dynamicDays = computed(() => {
   const today = new Date()
   const result = ['Aujourd\'hui']
   
-  for (let i = 1; i < 6; i++) {
+  for (let i = 1; i < 5; i++) {
     const date = new Date(today)
     date.setDate(today.getDate() + i)
     const dayName = date.toLocaleDateString('fr-FR', { weekday: 'short' })
@@ -28,7 +28,7 @@ const dynamicDays = computed(() => {
 </script>
 
 <template>
-  <section class="flex w-full h-fit bg-white/40 backdrop-blur-md rounded-md shadow overflow-hidden border border-white/70">
+  <section class="flex w-full h-fit bg-white/40 backdrop-blur-md rounded-xl shadow overflow-hidden border border-white/70">
     <button
       v-for="(day, index) in dynamicDays"
       :key="index"

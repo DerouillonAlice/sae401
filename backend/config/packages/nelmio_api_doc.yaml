@@ -58,3 +58,5 @@ nelmio_api_doc:
                 - ^/reset-password
                 - ^/user/profile
                 - ^/user/change-password
+                - ^/user/alert
+                - ^/user

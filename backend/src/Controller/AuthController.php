@@ -13,6 +13,10 @@ use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 use App\Repository\UserRepository;
 use OpenApi\Attributes as OA;
+use SymfonyCasts\Bundle\ResetPassword\Exception\TooManyPasswordRequestsException;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class AuthController extends AbstractController
 {
@@ -100,7 +104,9 @@ class AuthController extends AbstractController
     public function requestResetPassword(
         Request $request,
         UserRepository $userRepository,
-        ResetPasswordHelperInterface $resetHelper
+        ResetPasswordHelperInterface $resetHelper,
+        MailerInterface $mailer,
+        UrlGeneratorInterface $urlGenerator
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $email = $data['email'] ?? null;
@@ -115,13 +121,38 @@ class AuthController extends AbstractController
             return new JsonResponse(['error' => 'User not found'], 404);
         }
 
-        $resetToken = $resetHelper->generateResetToken($user);
+        try {
+            $resetToken = $resetHelper->generateResetToken($user);
+        } catch (TooManyPasswordRequestsException $e) {
+            return new JsonResponse([
+                'error' => 'Une demande a déjà été envoyée récemment. Veuillez vérifier votre boîte mail ou réessayer plus tard.'
+            ], 429);
+        }
+        $frontendUrl = $_ENV['FRONTEND_URL'] ?? 'http://localhost:5173';
+        $resetUrl = $frontendUrl . '/reset-password?token=' . $resetToken->getToken();
+        
+
+        $emailMessage = (new Email())
+            ->from('no-reply@tonsite.com')
+            ->to($user->getEmail())
+            ->subject('Réinitialisation de votre mot de passe')
+            ->text("Bonjour,\n\nPour réinitialiser votre mot de passe, cliquez sur le lien suivant :\n$resetUrl\n\nCe lien expirera dans une heure.");
+
+            try {
+                $mailer->send($emailMessage);
+            } catch (\Throwable $e) {
+                return new JsonResponse([
+                    'error' => 'Erreur lors de l\'envoi du mail : ' . $e->getMessage()
+                ], 500);
+            }
+            
 
         return new JsonResponse([
-            'resetToken' => $resetToken->getToken(),
-            'expiresAt' => $resetToken->getExpiresAt()->getTimestamp(),
+            'token' => $resetToken->getToken(),
+            'message' => 'Un email a été envoyé pour réinitialiser votre mot de passe.'
         ]);
     }
+
     #[OA\Post(
         path: '/reset-password',
         summary: 'Réinitialiser le mot de passe',
@@ -150,7 +181,7 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $token = $data['token'] ?? null;
-        $newPassword = $data['password'] ?? null;
+        $newPassword = $data['newPassword'] ?? null;
 
         if (!$token || !$newPassword) {
             return new JsonResponse(['error' => 'Token and new password are required'], 400);
