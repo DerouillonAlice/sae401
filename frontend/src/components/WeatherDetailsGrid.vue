@@ -1,16 +1,14 @@
 <template>
   <div class="flex flex-col">
-    <div class="flex flex-1 overflow-hidden">
-      <main class="flex-1 overflow-auto sm:overflow-clip">
+    <div class="flex flex-1">
+      <main class="flex-1 ">
         <div class="w-full flex flex-col gap-4 mx-auto">
-          <!-- Configuration des blocs pour utilisateurs connectés -->
           <BlockSelector 
             v-if="auth.isConnected"
             v-model:blocks="allBlocks"
           />
 
           <div class="flex flex-col lg:flex-row gap-4 items-stretch">
-            <!-- Carte météo principale -->
             <WeatherMainCard
               :current-day-data="currentDayData"
               :day-forecast-data="dayForecastData"
@@ -21,21 +19,23 @@
               :get-date-info="getDateInfo"
             />
 
-            <!-- Grille personnalisable pour utilisateurs connectés -->
-            <WeatherGrid
+            <div 
               v-if="auth.isConnected && layout.length > 0"
-              v-model:layout="layout"
-              :all-blocks="allBlocks"
-              :current-day-data="currentDayData"
-              :city-data="cityData"
-              :forecast-data="forecastData"
-              :selected-day-index="selectedDayIndex"
-              :col-num="colNum"
-              :container-width="containerWidth"
-              @update-layout="updateLayout"
-            />
+              class="flex-1 lg:flex-[2] w-full"
+            >
+              <WeatherGrid
+                v-model:layout="layout"
+                :all-blocks="allBlocks"
+                :current-day-data="currentDayData"
+                :city-data="cityData"
+                :forecast-data="forecastData"
+                :selected-day-index="selectedDayIndex"
+                :col-num="colNum"
+                :container-width="containerWidth"
+                @update-layout="updateLayout"
+              />
+            </div>
 
-            <!-- Message pour utilisateur connecté sans blocs actifs -->
             <div v-else-if="auth.isConnected && layout.length === 0" 
                  class="flex-1 lg:flex-[2] flex flex-col gap-4">
               <div class="flex flex-col items-center justify-center rounded-2xl border shadow bg-white/60 backdrop-blur-md p-8 text-black text-center h-full min-h-[300px]">
@@ -47,7 +47,6 @@
               </div>
             </div>
 
-            <!-- Blocs par défaut pour utilisateurs non connectés -->
             <DefaultWeatherBlocks
               v-else
               :all-blocks="allBlocks"
@@ -91,7 +90,6 @@ const auth = useAuthStore()
 
 const selectedDayIndex = ref(props.selectedDayIndex)
 
-// Utilisation des composables
 const {
   weatherData,
   forecastData,
@@ -112,7 +110,6 @@ const {
   loadFavoriteConfig
 } = useWeatherLayout(route, auth)
 
-// Données calculées
 const currentDayData = computed(() => {
   if (selectedDayIndex.value === 0) {
     return weatherData.value
@@ -122,13 +119,11 @@ const currentDayData = computed(() => {
 })
 
 const dayForecastData = computed(() => {
-  // Utiliser les vraies données horaires de l'API
   return getHourlyDataForDay(selectedDayIndex.value)
 })
 
 const { imageUrl } = useWeatherImage(currentDayData)
 
-// Méthodes
 const goToRegister = () => {
   router.push({ path: '/inscription' })
 }
@@ -153,7 +148,6 @@ function getDateInfo() {
   }
 }
 
-// Watchers et lifecycle
 watch(() => props.selectedDayIndex, (newIndex) => {
   selectedDayIndex.value = newIndex
 })
