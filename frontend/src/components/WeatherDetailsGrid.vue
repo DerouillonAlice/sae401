@@ -99,7 +99,8 @@ const {
   cityData,
   fetchWeather,
   fetchForecast,
-  getDefaultVille
+  getDefaultVille,
+  getHourlyDataForDay
 } = useWeatherData(route, auth)
 
 const {
@@ -121,31 +122,8 @@ const currentDayData = computed(() => {
 })
 
 const dayForecastData = computed(() => {
-  if (selectedDayIndex.value === 0) {
-    return todayHourlyData.value
-  } else {
-    const dayData = forecastData.value[selectedDayIndex.value - 1]
-    if (!dayData) return []
-
-    const baseTemp = dayData.main?.temp || 20
-    return [
-      {
-        label: 'Matin',
-        temp: baseTemp - 3,
-        icon: dayData.weather?.[0]?.icon
-      },
-      {
-        label: 'Après-midi',
-        temp: baseTemp + 2,
-        icon: dayData.weather?.[0]?.icon
-      },
-      {
-        label: 'Soir',
-        temp: baseTemp - 1,
-        icon: dayData.weather?.[0]?.icon
-      }
-    ]
-  }
+  // Utiliser les vraies données horaires de l'API
+  return getHourlyDataForDay(selectedDayIndex.value)
 })
 
 const { imageUrl } = useWeatherImage(currentDayData)
