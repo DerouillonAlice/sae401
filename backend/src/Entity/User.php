@@ -21,7 +21,6 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: "id", type: "integer"),
         new OA\Property(property: "firstname", type: "string"),
         new OA\Property(property: "email", type: "string"),
-        // Ajoutez ici les autres propriétés exposées par "user:read"
     ],
     type: "object"
 )]
@@ -72,6 +71,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read'])]
     private ?string $emailNotification = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[Groups(['user:read'])]
+    private bool $alertEnabled = false;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['user:read'])]
+    private ?array $alertTypes = [];
+
+    #[ORM\Column(length: 20, options: ['default' => 'moderate'])]
+    #[Groups(['user:read'])]
+    #[Assert\Choice(choices: ['minor', 'moderate', 'severe', 'extreme'], message: 'Choisissez un niveau de gravité valide.')]
+    private string $alertSeverity = 'moderate';
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['user:read'])]
+    private ?array $alertLocations = [];
 
     /**
      * @var Collection<int, Favorite>
@@ -222,6 +238,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmailNotification(?string $email): static
     {
         $this->emailNotification = $email;
+        return $this;
+    }
+
+    public function getAlertEnabled(): bool
+    {
+        return $this->alertEnabled;
+    }
+
+    public function setAlertEnabled(bool $alertEnabled): static
+    {
+        $this->alertEnabled = $alertEnabled;
+        return $this;
+    }
+
+    public function getAlertTypes(): ?array
+    {
+        return $this->alertTypes;
+    }
+
+    public function setAlertTypes(?array $alertTypes): static
+    {
+        $this->alertTypes = $alertTypes;
+        return $this;
+    }
+
+    public function getAlertSeverity(): string
+    {
+        return $this->alertSeverity;
+    }
+
+    public function setAlertSeverity(string $alertSeverity): static
+    {
+        $this->alertSeverity = $alertSeverity;
+        return $this;
+    }
+
+    public function getAlertLocations(): ?array
+    {
+        return $this->alertLocations;
+    }
+
+    public function setAlertLocations(?array $alertLocations): static
+    {
+        $this->alertLocations = $alertLocations;
         return $this;
     }
 }

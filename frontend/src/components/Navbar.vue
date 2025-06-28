@@ -30,7 +30,7 @@
 
         <ul
           v-if="searchResults.length"
-          class="absolute left-0 right-0 mt-2 bg-white/90 backdrop-blur-md shadow-lg rounded-lg border border-gray-300 z-10 max-h-40 overflow-y-auto"
+          class="absolute left-0 right-0 mt-2 bg-white/90 backdrop-blur-md shadow-lg rounded-xl border border-gray-300 z-10 max-h-40 overflow-y-auto"
         >
           <li
             v-for="(result, index) in searchResults"
@@ -38,7 +38,10 @@
             @click="selectResult(result)"
             class="px-4 py-2 hover:bg-gray-200 cursor-pointer flex justify-between items-center"
           >
-            <span>{{ result.name }}</span>
+            <span>
+              {{ result.name }}
+              <span v-if="result.postalCode" class="text-sm text-gray-500"> ({{ result.postalCode }})</span>
+            </span>
             <span v-if="result.country" class="text-sm text-gray-500">({{ result.country }})</span>
           </li>
         </ul>
