@@ -12,20 +12,20 @@
       <div v-else>
         <form @submit.prevent="updateProfile" class="space-y-4">
           <div>
-            <label class="font-semibold">Nom</label>
-            <input v-model="user.firstname" type="text"
+            <label for="firstname" class="font-semibold">Nom</label>
+            <input id="firstname" v-model="user.firstname" type="text"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
           </div>
 
           <div>
-            <label class="font-semibold">Email</label>
-            <input v-model="user.email" type="email"
+            <label for="email" class="font-semibold">Email</label>
+            <input id="email" v-model="user.email" type="email"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
           </div>
 
           <div>
-            <label class="font-semibold">Unité température</label>
-            <select v-model="user.uniteTemperature"
+            <label for="uniteTemperature" class="font-semibold">Unité température</label>
+            <select id="uniteTemperature" v-model="user.uniteTemperature"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm">
               <option value="Celsius">Celsius</option>
               <option value="Fahrenheit">Fahrenheit</option>
@@ -33,8 +33,8 @@
           </div>
 
           <div>
-            <label class="font-semibold">Unité pression</label>
-            <select v-model="user.unitePression"
+            <label for="unitePression" class="font-semibold">Unité pression</label>
+            <select id="unitePression" v-model="user.unitePression"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm">
               <option value="hPa">hPa</option>
               <option value="mmHg">mmHg</option>
@@ -42,8 +42,8 @@
           </div>
 
           <div>
-            <label class="font-semibold">Unité vent</label>
-            <select v-model="user.uniteVent"
+            <label for="uniteVent" class="font-semibold">Unité vent</label>
+            <select id="uniteVent" v-model="user.uniteVent"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm">
               <option value="km/h">km/h</option>
               <option value="m/s">m/s</option>
@@ -67,14 +67,14 @@
 
         <form @submit.prevent="changePassword" class="space-y-4">
           <div>
-            <label class="font-semibold">Ancien mot de passe</label>
-            <input v-model="oldPassword" type="password"
+            <label for="oldPassword" class="font-semibold">Ancien mot de passe</label>
+            <input id="oldPassword" v-model="oldPassword" type="password"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               required />
           </div>
           <div>
-            <label class="font-semibold">Nouveau mot de passe</label>
-            <input v-model="newPassword" type="password"
+            <label for="newPassword" class="font-semibold">Nouveau mot de passe</label>
+            <input id="newPassword" v-model="newPassword" type="password"
               class="w-full mt-1 px-4 py-2 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               required />
           </div>
