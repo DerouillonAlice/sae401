@@ -12,12 +12,37 @@ export function useWeatherLayout(route, auth) {
   ])
 
   const predefinedLayouts = {
-    1: [{ i: '1', x: 0, y: 0, w: 3, h: 2 }],
-    2: [{ i: '1', x: 0, y: 0, w: 3, h: 1 }, { i: '2', x: 0, y: 1, w: 3, h: 1 }],
-    3: [{ i: '1', x: 0, y: 0, w: 1.5, h: 1 }, { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 }, { i: '3', x: 0, y: 1, w: 3, h: 1 }],
-    4: [{ i: '1', x: 0, y: 0, w: 1.5, h: 1 }, { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 }, { i: '3', x: 0, y: 1, w: 1.5, h: 1 }, { i: '4', x: 1.5, y: 1, w: 1.5, h: 1 }],
-    5: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 2, h: 1 }, { i: '5', x: 2, y: 1, w: 1, h: 1 }],
-    6: [{ i: '1', x: 0, y: 0, w: 1, h: 1 }, { i: '2', x: 1, y: 0, w: 1, h: 1 }, { i: '3', x: 2, y: 0, w: 1, h: 1 }, { i: '4', x: 0, y: 1, w: 1, h: 1 }, { i: '5', x: 1, y: 1, w: 1, h: 1 }, { i: '6', x: 2, y: 1, w: 1, h: 1 }]
+    1: [{ i: '1', x: 0, y: 0, w: 3, h: 1 }],
+    2: [
+      { i: '1', x: 0, y: 0, w: 3, h: 1 }, 
+      { i: '2', x: 0, y: 1, w: 3, h: 1 }
+    ],
+    3: [
+      { i: '1', x: 0, y: 0, w: 1, h: 1 }, 
+      { i: '2', x: 1, y: 0, w: 1, h: 1 }, 
+      { i: '3', x: 2, y: 0, w: 1, h: 1 }
+    ],
+    4: [
+      { i: '1', x: 0, y: 0, w: 1.5, h: 1 }, 
+      { i: '2', x: 1.5, y: 0, w: 1.5, h: 1 }, 
+      { i: '3', x: 0, y: 1, w: 1.5, h: 1 }, 
+      { i: '4', x: 1.5, y: 1, w: 1.5, h: 1 }
+    ],
+    5: [
+      { i: '1', x: 0, y: 0, w: 1, h: 1 }, 
+      { i: '2', x: 1, y: 0, w: 1, h: 1 }, 
+      { i: '3', x: 2, y: 0, w: 1, h: 1 }, 
+      { i: '4', x: 0, y: 1, w: 1, h: 1 }, 
+      { i: '5', x: 1, y: 1, w: 2, h: 1 }
+    ],
+    6: [
+      { i: '1', x: 0, y: 0, w: 1, h: 1 }, 
+      { i: '2', x: 1, y: 0, w: 1, h: 1 }, 
+      { i: '3', x: 2, y: 0, w: 1, h: 1 }, 
+      { i: '4', x: 0, y: 1, w: 1, h: 1 }, 
+      { i: '5', x: 1, y: 1, w: 1, h: 1 }, 
+      { i: '6', x: 2, y: 1, w: 1, h: 1 }
+    ]
   }
 
   const layout = ref([])
@@ -113,6 +138,7 @@ export function useWeatherLayout(route, auth) {
       )
       
       if (currentFavorite.value) {
+        // Ville dans les favoris : charger la configuration sauvegardée
         allBlocks.value.forEach(block => {
           switch(block.name) {
             case 'Vent': block.active = currentFavorite.value.showWind; break
@@ -130,11 +156,11 @@ export function useWeatherLayout(route, auth) {
           generateDefaultLayout()
         }
       } else {
-        // Utilisateur connecté mais pas de config pour cette ville
+        // Ville PAS dans les favoris : tous les blocs décochés par défaut
         allBlocks.value.forEach(block => {
-          block.active = true
+          block.active = false
         })
-        generateDefaultLayout()
+        layout.value = [] // Grille vide
       }
       
       nextTick(() => {
@@ -143,11 +169,11 @@ export function useWeatherLayout(route, auth) {
         }, 200)
       })
     } else {
-      // Utilisateur non connecté - tous les blocs actifs pour l'affichage par défaut
+      // Utilisateur non connecté : tous les blocs actifs
       allBlocks.value.forEach(block => {
         block.active = true
       })
-      layout.value = [] // Pas de layout personnalisé pour les non-connectés
+      layout.value = []
     }
   }
 
@@ -167,10 +193,12 @@ export function useWeatherLayout(route, auth) {
       }
       
       try {
-        await updateFavoriteConfig(currentFavorite.value.id, config)
-        const currentFavId = currentFavorite.value.id
-        await auth.fetchFavorites()
-        currentFavorite.value = auth.favorites.find(fav => fav.id === currentFavId)
+        const result = await updateFavoriteConfig(currentFavorite.value.id, config)
+        if (result.success) {
+          const currentFavId = currentFavorite.value.id
+          await auth.fetchFavorites()
+          currentFavorite.value = auth.favorites.find(fav => fav.id === currentFavId)
+        }
       } catch (error) {
         console.error('Erreur lors de la sauvegarde:', error)
       }

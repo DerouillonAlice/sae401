@@ -2,13 +2,15 @@
   <div class="flex flex-col">
     <div class="flex flex-1 overflow-hidden">
       <main class="flex-1 overflow-auto sm:overflow-clip">
-        <div class="w-full flex flex-col mx-auto">
+        <div class="w-full flex flex-col gap-4 mx-auto">
+          <!-- Configuration des blocs pour utilisateurs connectés -->
           <BlockSelector 
             v-if="auth.isConnected"
             v-model:blocks="allBlocks"
           />
 
           <div class="flex flex-col lg:flex-row gap-4 items-stretch">
+            <!-- Carte météo principale -->
             <WeatherMainCard
               :current-day-data="currentDayData"
               :day-forecast-data="dayForecastData"
@@ -16,9 +18,10 @@
               :image-url="imageUrl"
               :is-connected="auth.isConnected"
               :has-layout="layout.length > 0"
-              @get-date-info="getDateInfo"
+              :get-date-info="getDateInfo"
             />
 
+            <!-- Grille personnalisable pour utilisateurs connectés -->
             <WeatherGrid
               v-if="auth.isConnected && layout.length > 0"
               v-model:layout="layout"
@@ -32,6 +35,19 @@
               @update-layout="updateLayout"
             />
 
+            <!-- Message pour utilisateur connecté sans blocs actifs -->
+            <div v-else-if="auth.isConnected && layout.length === 0" 
+                 class="flex-1 lg:flex-[2] flex flex-col gap-4">
+              <div class="flex flex-col items-center justify-center rounded-2xl border shadow bg-white/60 backdrop-blur-md p-8 text-black text-center h-full min-h-[300px]">
+                <div class="text-xl font-bold mb-2">Aucun bloc météo sélectionné</div>
+                <div class="text-sm text-gray-600 mb-4">
+                  Utilisez la configuration ci-dessus pour activer les blocs météo que vous souhaitez afficher.
+                </div>
+                <div class="text-lg">📊</div>
+              </div>
+            </div>
+
+            <!-- Blocs par défaut pour utilisateurs non connectés -->
             <DefaultWeatherBlocks
               v-else
               :all-blocks="allBlocks"
@@ -75,6 +91,7 @@ const auth = useAuthStore()
 
 const selectedDayIndex = ref(props.selectedDayIndex)
 
+// Utilisation des composables
 const {
   weatherData,
   forecastData,
@@ -92,8 +109,9 @@ const {
   containerWidth,
   updateLayout,
   loadFavoriteConfig
-} = useWeatherLayout(route, auth, weatherData, forecastData)
+} = useWeatherLayout(route, auth)
 
+// Données calculées
 const currentDayData = computed(() => {
   if (selectedDayIndex.value === 0) {
     return weatherData.value
@@ -132,6 +150,7 @@ const dayForecastData = computed(() => {
 
 const { imageUrl } = useWeatherImage(currentDayData)
 
+// Méthodes
 const goToRegister = () => {
   router.push({ path: '/inscription' })
 }
@@ -156,6 +175,7 @@ function getDateInfo() {
   }
 }
 
+// Watchers et lifecycle
 watch(() => props.selectedDayIndex, (newIndex) => {
   selectedDayIndex.value = newIndex
 })

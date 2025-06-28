@@ -4,7 +4,7 @@
       <div
         v-for="block in allBlocks.slice(0, 3)"
         :key="block.i"
-        class="flex-1 flex flex-col items-center justify-center text-lg font-semibold space-y-2 text-black text-center h-full"
+        class="flex-1 flex flex-col items-center justify-center  text-black text-center h-full"
       >
         <WeatherBlock
           :name="block.name"
@@ -18,7 +18,7 @@
     </div>
     
     <div class="flex flex-col lg:flex-row gap-4 items-stretch">
-      <div class="flex-1 flex flex-col items-center justify-center rounded-xl border shadow bg-white/60 backdrop-blur-md p-6 text-black text-center h-full min-h-[180px]">
+      <div class="flex-1 flex flex-col items-center justify-center rounded-2xl border shadow bg-white/60 backdrop-blur-md p-6 text-black text-center h-full min-h-[180px]">
         <div class="text-xl font-bold mb-2">Connectez-vous pour accéder à toutes les fonctionnalités</div>
         <div class="text-sm text-gray-600 mb-4">
           Personnalisez votre dashboard, sauvegardez vos villes favorites et configurez vos préférences météo

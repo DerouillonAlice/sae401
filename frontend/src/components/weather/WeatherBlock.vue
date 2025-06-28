@@ -1,87 +1,106 @@
 <template>
-  <div class="h-full w-full flex flex-col items-center justify-center rounded-xl shadow text-lg font-semibold text-center p-4 border backdrop-blur-sm bg-white/60 space-y-2">
-    <component :is="getIconComponent(name)" class="w-10 h-10 text-black" />
-    <div>
-      {{ getBlockContent(name) }}
+  <div class="bg-white/60 backdrop-blur-md rounded-2xl border shadow p-4 h-full flex flex-col justify-between">
+    <div class="flex items-center justify-between mb-2">
+      <h4 class="text-sm font-semibold text-gray-700">{{ name }}</h4>
+    </div>
+    
+    <div class="flex-1 flex flex-col justify-center">
+      <!-- Affichage spécial pour le cycle soleil -->
+      <div v-if="name === 'Cycle Soleil'" class="space-y-2">
+        <div class="text-center">
+          <div class="text-lg font-bold text-gray-800">
+            {{ getSunriseTime() }}
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="text-lg font-bold text-gray-800">
+            {{ getSunsetTime() }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Affichage normal pour les autres blocs -->
+      <div v-else>
+        <div class="text-xl font-bold text-gray-800 mb-1">
+          {{ getValue() }}
+        </div>
+        <div class="text-xs text-gray-600">
+          {{ getUnit() }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import SunCalc from 'suncalc'
-import { formatWind, formatPressure } from '@/services/unitUtils'
-import {
-  WindIcon,
-  BarChart3Icon,
-  DropletIcon,
-  EyeIcon,
-  CloudIcon,
-  SunIcon
-} from 'lucide-vue-next'
-
 const props = defineProps({
-  name: String,
-  currentDayData: Object,
-  cityData: Object,
-  forecastData: Array,
-  selectedDayIndex: Number
+  name: {
+    type: String,
+    required: true
+  },
+  currentDayData: {
+    type: Object,
+    default: null
+  },
+  cityData: {
+    type: Object,
+    default: null
+  },
+  forecastData: {
+    type: Array,
+    default: () => []
+  },
+  selectedDayIndex: {
+    type: Number,
+    default: 0
+  }
 })
 
-function getIconComponent(name) {
-  switch (name) {
-    case 'Vent': return WindIcon
-    case 'Cycle Soleil': return SunIcon
-    case 'Pression': return BarChart3Icon
-    case 'Humidité': return DropletIcon
-    case 'Visibilité': return EyeIcon
-    case 'Nuages': return CloudIcon
-    default: return SunIcon
-  }
+function formatTime(timestamp) {
+  if (!timestamp) return '—'
+  const date = new Date(timestamp * 1000)
+  return `${date.getHours().toString().padStart(2, '0')}h${date.getMinutes().toString().padStart(2, '0')}`
 }
 
-function isFrenchCity() {
-  return props.cityData?.country === 'FR'
+function getSunriseTime() {
+  // Priorité aux données actuelles du jour, sinon données de la ville
+  const sunrise = props.currentDayData?.sys?.sunrise || props.cityData?.sunrise
+  return formatTime(sunrise)
 }
 
-function formatSunTime(date, timezoneOffsetSeconds) {
-  if (isFrenchCity()) {
-    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-  }
-  const local = new Date(date.getTime() + timezoneOffsetSeconds * 1000)
-  return local.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+function getSunsetTime() {
+  // Priorité aux données actuelles du jour, sinon données de la ville
+  const sunset = props.currentDayData?.sys?.sunset || props.cityData?.sunset
+  return formatTime(sunset)
 }
 
-function getBlockContent(name) {
-  const data = props.currentDayData
-  if (!data) return name
-
-  switch (name) {
-    case 'Vent': return formatWind(data.wind?.speed)
-    case 'Cycle Soleil': {
-      const tz = props.cityData?.timezone ?? 0
-      const lat = props.cityData?.coord?.lat
-      const lon = props.cityData?.coord?.lon
-      let date
-      if (props.selectedDayIndex === 0) {
-        date = new Date()
-      } else {
-        const dayData = props.forecastData[props.selectedDayIndex - 1]
-        date = dayData?.date || new Date()
-      }
-
-      if (lat && lon && date) {
-        const times = SunCalc.getTimes(date, lat, lon)
-        const sunrise = formatSunTime(times.sunrise, tz)
-        const sunset = formatSunTime(times.sunset, tz)
-        return `${sunrise} / ${sunset}`
-      }
+function getValue() {
+  if (!props.currentDayData) return '—'
+  
+  switch (props.name) {
+    case 'Vent':
+      return Math.round(props.currentDayData.wind?.speed * 3.6 || 0)
+    case 'Humidité':
+      return props.currentDayData.main?.humidity || 0
+    case 'Visibilité':
+      return Math.round((props.currentDayData.visibility || 0) / 1000)
+    case 'Nuages':
+      return props.currentDayData.clouds?.all || 0
+    case 'Pression':
+      return props.currentDayData.main?.pressure || 0
+    default:
       return '—'
-    }
-    case 'Pression': return formatPressure(data.main?.pressure)
-    case 'Humidité': return `${data.main?.humidity || 0} %`
-    case 'Visibilité': return `${Math.round((data.visibility || 0) / 1000)} km`
-    case 'Nuages': return `${data.clouds?.all || 0} %`
-    default: return name
+  }
+}
+
+function getUnit() {
+  switch (props.name) {
+    case 'Vent': return 'km/h'
+    case 'Humidité': return '%'
+    case 'Visibilité': return 'km'
+    case 'Nuages': return '% couverture'
+    case 'Pression': return 'hPa'
+    default: return ''
   }
 }
 </script>

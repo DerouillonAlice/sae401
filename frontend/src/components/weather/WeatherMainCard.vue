@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'relative  rounded-xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
+      'relative rounded-xl border shadow bg-white/60 backdrop-blur-md p-6 flex flex-col justify-between overflow-hidden',
       isConnected && hasLayout ? 'flex-1' : isConnected ? 'w-full m-2' : 'w-full lg:max-w-md'
     ]"
   >
@@ -24,7 +24,7 @@
     </div>
 
     <div class="mt-4 text-sm font-semibold z-10 relative">
-      {{ selectedDayIndex === 0 ? 'Dernière mise à jour' : 'Prévisions pour' }} : {{ $emit('get-date-info') }}
+      {{ selectedDayIndex === 0 ? 'Dernière mise à jour' : 'Prévisions pour' }} : {{ getDateInfoText() }}
     </div>
 
     <div class="flex w-full mt-6 z-10 relative">
@@ -57,15 +57,19 @@ const props = defineProps({
   selectedDayIndex: Number,
   imageUrl: String,
   isConnected: Boolean,
-  hasLayout: Boolean
+  hasLayout: Boolean,
+  getDateInfo: Function
 })
-
-const emit = defineEmits(['get-date-info'])
 
 function getForecastIcon(code) {
   if (code?.includes('09')) return iconLightRain
   if (code?.includes('10')) return iconRain
   if (code?.includes('01')) return iconSun
   return iconSun
+}
+
+function getDateInfoText() {
+  // Appeler directement la fonction passée en prop
+  return props.getDateInfo ? props.getDateInfo() : '—'
 }
 </script>
