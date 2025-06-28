@@ -188,6 +188,8 @@ export const requestResetPassword = (email) => {
 export const resetPassword = (token, newPassword) => {
   return axios.post('/api/reset-password', { token, newPassword })
 
+}
+
   export const removeFavorite = async (city) => {
   try {
     const res = await axios.delete(`/api/favorites/${encodeURIComponent(city)}`)
