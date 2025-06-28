@@ -148,6 +148,7 @@ class AuthController extends AbstractController
             
 
         return new JsonResponse([
+            'token' => $resetToken->getToken(),
             'message' => 'Un email a été envoyé pour réinitialiser votre mot de passe.'
         ]);
     }
@@ -180,7 +181,7 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $token = $data['token'] ?? null;
-        $newPassword = $data['password'] ?? null;
+        $newPassword = $data['newPassword'] ?? null;
 
         if (!$token || !$newPassword) {
             return new JsonResponse(['error' => 'Token and new password are required'], 400);
