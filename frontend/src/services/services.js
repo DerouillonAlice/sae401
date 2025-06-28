@@ -5,10 +5,23 @@ axios.defaults.baseURL = ''
 
 // Intercepteurs...
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  const publicRoutes = [
+    '/api/contact',
+    '/api/login_check',
+    '/api/register',
+    '/api/request-reset-password',
+    '/api/reset-password'
+  ]
+
+  const isPublic = publicRoutes.some(route => config.url.includes(route))
+
+  if (!isPublic) {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
   }
+
   return config
 })
 
@@ -249,3 +262,18 @@ export const testAlert = async () => {
     return handleError(error)
   }
 }
+
+// Service Contact
+export const sendContactMessage = async (name, email, message) => {
+  try {
+    const res = await axios.post('http://localhost:8319/api/contact', {
+      name,
+      email,
+      message
+    })
+    return { success: true, data: res.data }
+  } catch (error) {
+    return handleError(error)
+  }
+}
+
