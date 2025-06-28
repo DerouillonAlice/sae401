@@ -56,6 +56,13 @@ const submitLogin = async (e) => {
         <router-link to="/inscription" class="text-blue-600 hover:underline font-semibold">
           Inscrivez-vous
         </router-link>
+        <router-link
+          to="/mot-de-passe-oublie"
+          class="text-sm text-blue-600 hover:underline block mt-4 text-center"
+        >
+          Mot de passe oublié ?
+        </router-link>
+
       </div>
     </form>
   </div>
