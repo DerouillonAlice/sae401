@@ -14,17 +14,30 @@ export function useWeatherData(route, auth) {
     return 'Paris'
   }
 
-  function fetchWeather() {
+  async function fetchWeather() {
     const ville = route.query.ville || getDefaultVille()
-    getWeatherByCity(ville)
-      .then(res => { weatherData.value = res.data })
+    
+    try {
+      const result = await getWeatherByCity(ville)
+      if (result.success) {
+        weatherData.value = result.data
+      } else {
+        console.error('Erreur météo:', result.message)
+        weatherData.value = null
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la météo:', error)
+      weatherData.value = null
+    }
   }
 
-  function fetchForecast() {
+  async function fetchForecast() {
     const ville = route.query.ville || getDefaultVille()
-    getForecastByCity(ville)
-      .then(res => {
-        const data = res.data
+    
+    try {
+      const result = await getForecastByCity(ville)
+      if (result.success) {
+        const data = result.data
         if (Array.isArray(data.list)) {
           cityData.value = data.city
 
@@ -64,7 +77,14 @@ export function useWeatherData(route, auth) {
 
           forecastData.value = dailyForecasts.slice(0, 7)
         }
-      })
+      } else {
+        console.error('Erreur prévisions:', result.message)
+        forecastData.value = []
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des prévisions:', error)
+      forecastData.value = []
+    }
   }
 
   function fetchTodayForecast(forecastList) {

@@ -27,4 +27,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:blocks'])
+
+function toggleBlock(block) {
+  const updatedBlocks = props.blocks.map(b => 
+    b.i === block.i ? { ...b, active: !b.active } : b
+  )
+  emit('update:blocks', updatedBlocks)
+}
 </script>
