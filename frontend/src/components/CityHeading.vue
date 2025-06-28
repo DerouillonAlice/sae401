@@ -7,6 +7,7 @@
         v-if="auth.isConnected"
         @click="toggleFavorite"
         class=""
+        :aria-label="isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

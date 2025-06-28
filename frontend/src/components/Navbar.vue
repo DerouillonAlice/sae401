@@ -5,6 +5,7 @@
       <router-link
         to="/"
         class="p-2 rounded-full bg-white/30 backdrop-blur-md shadow-lg border border-white/70 hover:bg-white/40 transition-all duration-300 ease-in-out outline-none"
+        aria-label="Retour à l'accueil"
       >
         <HomeIcon class="w-6 h-6" />
       </router-link>
